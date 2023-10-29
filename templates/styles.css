@@ -186,3 +186,49 @@
       color: #a1a1a1;
       padding: 10px 20px;
     }
+
+    /* Style the entire form container */
+form#level {
+    margin: 0 auto;
+    width: 50%;
+    background:#b2b1d0;
+    color: #000;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Style the select dropdown */
+form#level select#selectValue {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #0c1216;
+    border-radius: 5px;
+    outline: none;
+    background: #ffffff; /* Semi-transparent white background */
+    color: #000;
+}
+
+/* Style the dropdown options */
+form#level select#selectValue option {
+    background: #3498db;
+    color: #fff;
+}
+
+/* Style the submit button */
+form#level input[type="submit"] {
+    background-color: rgb(242, 242, 121);
+    color: #302f49;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Style the submit button on hover */
+form#level input[type="submit"]:hover {
+    background-color: #2676b7;
+}
+

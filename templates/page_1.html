@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LibSpace</title>
+  <script src="https://kit.fontawesome.com/53d0e98b35.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sriracha&display=swap');
+
+    body {
+      margin: 0;
+      box-sizing: border-box;
+    }
+
+    /* CSS for header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height :auto;
+      background-color: #ffffff;
+    }
+
+    .header img {
+        width: 40px;
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        margin-left: -1025px;
+    }
+
+    .header .logo {
+      font-size: 20px;
+      font-family: 'Sriracha', cursive;
+      color: #000;
+      text-decoration: none;
+      margin-left: 20px ;
+    }
+    
+    .nav-items {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background-color: #ffffff;
+      margin-right: 20px;
+    }
+
+    .nav-items a {
+      text-decoration: none;
+      color: #000;
+      padding: 35px 20px;
+    }
+
+    /* CSS for main element */
+    .intro {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 800px;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.5) 100%), url("https://d2r55xnwy6nx47.cloudfront.net/uploads/2021/11/Predicitve-Coding_1200_social.jpg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .intro h1 {
+      font-family: sans-serif;
+      font-size: 90px;
+      color: #fff;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    .intro p {
+      font-size: 20px;
+      color: #d1d1d1;
+      text-transform: uppercase;
+      margin: 20px 0;
+    }
+
+    /*.intro button {
+      background-color: #5edaf0;
+      color: #000;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 5px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.4)
+    }
+
+    /* CSS for timing input */
+    .timing-input {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+        margin-left : 100px;
+    }
+
+    .timing-input input {
+        padding: 10px;
+        font-size: 16px;
+        margin: 0 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .timing-input button {
+        background-color: #5edaf0;
+        color: #000;
+        padding: 10px 25px;
+        border: none;
+        border-radius: 5px;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.4);
+    }
+
+
+    .about-clb {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 80px;
+      border-top: 2px solid #eeeeee;
+    }
+
+    .about-clb img {
+      width: 500px;
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    .about-clb-text h2 {
+      font-size: 30px;
+      color: #333333;
+      text-transform: uppercase;
+      margin: 20px 0;
+    }
+
+    .about-clb-text p {
+      font-size: 15px;
+      color: #585858;
+      margin: 10px 0;
+    }
+
+    /* CSS for footer */
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      height: 100px;
+      background-color: #302f49;
+      padding: 40px 60px;
+    }
+
+    .footer .copy {
+      color: #a1a1a1;
+    }
+
+    .bottom-links {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 40px 0;
+    }
+
+    .bottom-links .links {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0 40px;
+    }
+
+    .bottom-links .links span {
+      font-size: 20px;
+      color: #fff;
+      text-transform: uppercase;
+      margin: 10px 50px;
+    }
+
+    .bottom-links .links a {
+      text-decoration: none;
+      color: #a1a1a1;
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <a href="#" class="logo"> NUS
+    </a>
+    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b9/NUS_coat_of_arms.svg/1280px-NUS_coat_of_arms.svg.png" alt="me">
+    <nav class="nav-items">
+      <a href="#">Home</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+    </nav>
+  </header>
+  <main>
+    <div class="intro">
+      <h1>NUS LibSpace
+      </h1>
+      <p>A website for you to check occupancy rate</p>
+      <div class="timing-input">
+        <label for="time">Time:</label>
+        <input type="time" id="time" name="time">
+        <button onclick="checkOccupancy()">Check Occupancy</button>
+        <div id="warningMessage" class="hidden">Please enter a timing.</div>
+      </div>
+    </div>
+    <div class="about-clb">
+      <div class="about-clb-text">
+        <h2>About NUS Central Library</h2>
+        <p> Located at the heart of NUS, Central Library stands out as one of the old charms of the University.
+            Many NUS alumni have wonderful memories of the Central Library, referring to it fondly as CLB.</p>
+      </div>
+      <img src="https://cdn.ifla.org/wp-content/uploads/files/assets/asia-and-oceania/news/nulcl.jpg" alt="me">
+    </div>
+  </main>
+  <footer class="footer">
+    <div class="copy">&copy; 2023 LibSpace</div>
+    <div class="bottom-links">
+      <div class="links">
+        <span>More Info</span>
+        <a href="#">Home</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="links">
+        <span>Social Links</span>
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+  </footer>
+  <script>
+    document.getElementById("checkOccupancy").addEventListener("click", function() {
+      var minTimingValue = parseInt(document.getElementById("minTiming").value);
+      var maxTimingValue = parseInt(document.getElementById("maxTiming").value);
+  
+      if (minTimingValue >= 0 && maxTimingValue >= minTimingValue && maxTimingValue <= 24) {
+        alert("You selected a timing range from " + minTimingValue + " to " + maxTimingValue + " hours.");
+        // Here, you can add your code to check and display occupancy based on the selected range.
+      } else {
+        alert("Invalid timing range. Please make sure to select a valid range between 0 and 24 hours.");
+      }
+    });
+    function checkOccupancy() {
+    // Get the value from the timing input field
+    const timingInput = document.getElementById("time").value;
+
+    // Check if the input is empty
+    if (timingInput === "") {
+      // Show the warning message
+      const warningMessage = document.getElementById("warningMessage");
+      warningMessage.classList.remove("hidden");
+    } else {
+      // Redirect to another webpage (change the URL to your desired destination)
+      window.location.href = "page_2.html"; // Make sure you are now in the dir of templates
+    }
+  }
+  </script>
+  
+</body>
+
+</html>

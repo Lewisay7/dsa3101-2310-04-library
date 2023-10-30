@@ -25,12 +25,13 @@
   </header>
   <main>
     <div class="intro">
-      <h1>NUS LibSpace
-      </h1>
+      <h1>NUS LibSpace</h1>
       <p>A website for you to check occupancy rate</p>
+
+      <form action="/get_time_level" method="POST">
       <div class="timing-input">
         <input type="time" id="time" name="time">
-        <select id="level" name="level">
+        <select id="level" name="level" >
           <option value="1">Level 1</option>
           <option value="3">Level 3</option>
           <option value="4">Level 4</option>
@@ -39,6 +40,8 @@
         </select>
         <button onclick="checkOccupancy()">Check Occupancy</button>
       </div>
+      </form>
+      
       <div id="warningMessage" class="hidden">Please enter a timing and level.</div>
     </div>
     <div class="about-clb" id="about-section">
@@ -50,6 +53,9 @@
       <img src="https://cdn.ifla.org/wp-content/uploads/files/assets/asia-and-oceania/news/nulcl.jpg" alt="me">
     </div>
   </main>
+
+
+
   <footer class="footer">
     <div class="copy">&copy; 2023 LibSpace</div>
     <div class="bottom-links">
@@ -67,6 +73,10 @@
       </div>
     </div>
   </footer>
+
+
+
+
   <script>
     document.getElementById("checkOccupancy").addEventListener("click", function() {
     });

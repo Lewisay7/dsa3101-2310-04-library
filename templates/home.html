@@ -30,9 +30,16 @@
       <p>A website for you to check occupancy rate</p>
       <div class="timing-input">
         <input type="time" id="time" name="time">
+        <select id="level" name="level">
+          <option value="1">Level 1</option>
+          <option value="3">Level 3</option>
+          <option value="4">Level 4</option>
+          <option value="5">Level 5</option>
+          <option value="6">Level 6</option>
+        </select>
         <button onclick="checkOccupancy()">Check Occupancy</button>
       </div>
-      <div id="warningMessage" class="hidden">Please enter a timing.</div>
+      <div id="warningMessage" class="hidden">Please enter a timing and level.</div>
     </div>
     <div class="about-clb" id="about-section">
       <div class="about-clb-text">
@@ -67,17 +74,19 @@
     function checkOccupancy() {
     // Get the value from the timing input field
     const timingInput = document.getElementById("time").value;
+    const levelInput = document.getElementById("level").value;
 
     // Check if the input is empty
-    if (timingInput === "") {
-      // Show the warning message
-      const warningMessage = document.getElementById("warningMessage");
-      warningMessage.classList.remove("hidden");
-    } else {
-      // Redirect to another webpage (change the URL to your desired destination)
-      window.location.href = "page_2.html"; // Make sure you are now in the dir of templates
+    if (timingInput === "" || levelInput === "") {
+        const warningMessage = document.getElementById("warningMessage");
+        warningMessage.classList.remove("hidden");
+      } else {
+        const warningMessage = document.getElementById("warningMessage");
+        warningMessage.classList.add("hidden");
+        // Redirect to another webpage (change the URL to your desired destination)
+        window.location.href = "page_2.html"; // Replace with your URL
+      }
     }
-  }
   </script>
   
 </body>

@@ -62,18 +62,7 @@
   </footer>
   <script>
     document.getElementById("checkOccupancy").addEventListener("click", function() {
-      var minTimingValue = parseInt(document.getElementById("minTiming").value);
-      var maxTimingValue = parseInt(document.getElementById("maxTiming").value);
-  
-      if (minTimingValue >= 0 && maxTimingValue >= minTimingValue && maxTimingValue <= 24) {
-        alert("You selected a timing range from " + minTimingValue + " to " + maxTimingValue + " hours.");
-        // Here, you can add your code to check and display occupancy based on the selected range.
-      } else {
-        alert("Invalid timing range. Please make sure to select a valid range between 0 and 24 hours.");
-      }
     });
-
-
 
     function checkOccupancy() {
     // Get the value from the timing input field

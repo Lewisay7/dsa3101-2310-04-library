@@ -30,7 +30,6 @@
       <p>A website for you to check occupancy rate</p>
       <div class="timing-input">
         <input type="time" id="time" name="time">
-        <label for="level">Level:</label>
         <select id="level" name="level">
           <option value="1">Level 1</option>
           <option value="3">Level 3</option>
@@ -39,8 +38,8 @@
           <option value="6">Level 6</option>
         </select>
         <button onclick="checkOccupancy()">Check Occupancy</button>
-        <div id="warningMessage" class="hidden">Please enter a timing.</div>
       </div>
+      <div id="warningMessage" class="hidden">Please enter a timing and level.</div>
     </div>
     <div class="about-clb" id="about-section">
       <div class="about-clb-text">

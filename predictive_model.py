@@ -2,36 +2,6 @@ import pandas as pd
 import numpy as np
 import math
 
-def select_columns(input):
-  
-  """
-  select the columns that are relevant in our model
-
-  Args:
-      the input data
-
-  Returns:
-      dataframe containing the direction,datetime,date columns
-  """
-  entry = input[["EntryDate","EntryTime","EntryDirection"]]
-  exit = input[["ExitDate","ExitTime","ExitDirection"]]
-
-  #add a column for datetime to plot the graph and to calculate average occupancy
-  entry["Datetime"] = pd.to_datetime(entry["EntryDate"].astype(str) + " " +  entry["EntryTime"].astype(str))
-  exit["Datetime"] = pd.to_datetime(exit["ExitDate"].astype(str) + " " + exit["ExitTime"].astype(str))
-
-  #rename the columns for concatanation
-  exit = exit.rename(columns={"ExitDate": "Date","ExitDirection":"Direction","ExitTime":"Time"})
-  entry = entry.rename(columns={"EntryDate": "Date","EntryDirection":"Direction","EntryTime":"Time"})
-
-  #concat entry and exit data to one dataframe with columns [Direction,Datetime,Date]
-  data = pd.concat([entry,exit],ignore_index=True)
-  data = data.sort_values(by = "Datetime")
-  data = data[["Direction", "Datetime","Date"]]
-  data["Date"] = pd.to_datetime(data["Date"])
-  return data
-
-
 #to see the no of ppl in library at a given time
 def add_occupancy(data):
   """
@@ -43,6 +13,8 @@ def add_occupancy(data):
   Returns:
       dataframe containing the direction,datetime,date and occupancy columns
   """
+  data["Datetime"] = pd.to_datetime(data["Datetime"])
+  data["Date"] = pd.to_datetime(data["Date"])
   data = data.copy()
   data["occupancy"] = list(np.zeros(len(data)))
   # here i add the occupancy column to see the number of ppl in the library at a certain time 
@@ -264,9 +236,9 @@ def create_model_output(data):
   return pd.DataFrame(model_output)
 
 
-input = pd.read_csv("datasets/clean_df.csv")
-data = select_columns(input)
-data = add_occupancy(data)
+input = pd.read_csv("datasets/clean_df.csv").drop(columns=['Unnamed: 0'])
+
+data = add_occupancy(input)
 # the code above take quite long to run...
 # the starting week of each AY to check at any given date, which week it is (week1-13 or recess or reading/exam)
 # i sorta hard-coded here and it doesnt work if they input data before ay20/21 and after ay26/27
@@ -283,6 +255,7 @@ baseline =  data[(data["Date"].dt.month == 1) & (25 <= data["Date"].dt.day) & (d
 
 model_output = create_model_output(data)
 print(model_output) 
+model_output.to_csv("datasets/model_output.csv")
 
 
 

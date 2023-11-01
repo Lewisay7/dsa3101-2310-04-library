@@ -19,7 +19,7 @@
         max-width: 100%;
         height: auto;
         border-radius: 10px;
-        margin-left: -1550px;
+        margin-left: -1020px;
     }
 
     .header .logo {
@@ -27,7 +27,7 @@
       font-family: 'Sriracha', cursive;
       color: #000;
       text-decoration: none;
-      margin-left: 65px;
+      margin-left: 35px;
     }
     
     .nav-items {

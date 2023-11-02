@@ -236,8 +236,7 @@ def create_model_output(data):
   return pd.DataFrame(model_output)
 
 
-input = pd.read_csv("datasets/clean_df.csv").drop(columns=['Unnamed: 0'])
-
+input = pd.read_csv("datasets/clean_df.csv")
 data = add_occupancy(input)
 # the code above take quite long to run...
 # the starting week of each AY to check at any given date, which week it is (week1-13 or recess or reading/exam)
@@ -255,7 +254,7 @@ baseline =  data[(data["Date"].dt.month == 1) & (25 <= data["Date"].dt.day) & (d
 
 model_output = create_model_output(data)
 print(model_output) 
-model_output.to_csv("datasets/model_output.csv")
+model_output.to_csv("datasets/model_output.csv",index = False)
 
 
 

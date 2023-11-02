@@ -21,10 +21,11 @@ def add_occupancy(data):
   for i in range(len(data)):
     if i == 0: #first entry
       data.iloc[0,-1] = 1 
-    elif (data.iloc[i,0] == "Entry"): # if entry, occupancy +1
+    elif (data.loc[i,"Direction"] == "Entry"): # if entry, occupancy +1
       data.iloc[i,-1] = data.iloc[i-1,-1] + 1
-    elif (data.iloc[i,0] == "Exit"): # if entry, occupancy -1
+    elif (data.loc[i,"Direction"] == "Exit"): # if entry, occupancy -1
       data.iloc[i,-1] = data.iloc[i-1,-1] -1
+  print(data)
   return data
 
 
@@ -94,7 +95,7 @@ def getNormalWeekData(data,week):
       output = pd.concat([output,temp],ignore_index = True)
   # if we dont have data for that particular week, we will just use the baseline data.
   if output.empty:
-    return baseline,True
+    return BASELINE,True
   return output,False
 
 def getReadingWeekData(data):
@@ -149,11 +150,46 @@ def checkIfDataOfDayPresent(data,day):
     return data[data["Date"].dt.dayofweek <= 4]
   return data[data["Date"].dt.dayofweek == day - 1]
 
-
-def predict_occupancy(week, day, time,data):
+#split the max capacity of library into 5 categories, 5. 0-200 people (very empty) | 4. 201-400 | 3. 401-600 | 2. 601-800 | 1. 801-1500 (library is full)
+PRESET_CATEGORY = {5:200,4:400,3:600,2:800,1:1500} # on the assumption that the max library capacity is 1.5k at any given time...
+def calculate_occupancy_for_level(week,day,time,level,occupancy,levels_survey_data):
   """
-  given the interested timeframe(week,day,time) we use the cleaned data(data) to calculate and output the average occupancy of that specific timeframe using historical data
+  for the given week, day, time, we will get the occupancy of the whole building, then from here we use the survey_data to calculate the distribution for each level and times a probability to it
 
+  Args:
+    object,int,int,object,int,DataFrame
+    level = 3/4/5/6/6Chinese (for chinese library)
+    levels_survey_data = cleaned data from the survey_data
+    
+  Returns:
+    an integer
+  """
+  #so now lets assume at 5pm the library has a total of 357 people, it would fall into category 4. The level dist will be:
+  #lvl<x> = (v5[lvl<x>]+v4[lvl<x>])/sum(v5+v4) * no. of people
+  #e.g lvl3 = (51+32)/[(51+46+53+48+37)+(32+77+45+62+30)] * 357 = 61 people on level 3
+  global PRESET_CATEGORY # on the assumption that the max library capacity is 1.5k at any given time...
+  for category,capacity in PRESET_CATEGORY.items():
+    if occupancy <= capacity:
+      occupancy_category = category
+      break
+  # to check if the timeframe interested in is within library opening hours. if it is only apply the probability thing, otherwise only level 6 is open, thus no meaning in calculating the probability
+  if week in ["Reading","Exam"] :
+    if 1<=day<=5: #weekday
+      if time > 21 or time < 9: #library opens from 9am-9pm
+        return occupancy
+    elif day == 6: #saturday
+      if time > 17 or time < 10: #library opens from 10am-5pm
+        return occupancy
+    elif day == 7: #library closes at sunday
+      return occupancy
+
+  probability = levels_survey_data[(levels_survey_data["level"] == level) & (levels_survey_data["preference"] >= occupancy_category)]["value"].sum() / levels_survey_data[levels_survey_data["preference"] >= occupancy_category]["value"].sum()
+  return math.ceil(occupancy * probability)
+
+def predict_occupancy(week, day, time, level, gates_data, levels_survey_data, seats_survey_data):
+  """
+  given the interested timeframe(week,day,time) and level, we use the cleaned data(data) to calculate and output the average occupancy of that specific timeframe using historical data
+  
   Args:
       object,int,int,DataFrame
         week = 1-13/Recess/Exam/Reading
@@ -168,28 +204,30 @@ def predict_occupancy(week, day, time,data):
   Returns:
       an integer 
   """
-  data = data.copy()
+  gates_data = gates_data.copy()
   # since we have such limited data, i assume that the distribution of occupancy for the weeks are almost iid.. and as the weeks get closer to midterms/exam, the number of people in the library would increase
   # the factor here is to
   factor = {1:0.95,2:0.97,3:1,4:1.03,5:1.05,6:1.1,7:1.1,8:1.05,9:1.06,10:1.06,11:1.18,12:1.2,13:1.3}
-  temp = segregrate_data(data)
+  temp = segregrate_data(gates_data)
   usedBaseline = False
   # here i split the weeks into different scenarios to access different weeks of data
   if week == "Recess": 
-    data = getRecessWeekData(temp)
+    gates_data = getRecessWeekData(temp)
   elif week == "Reading":
-    data = getReadingWeekData(temp)
+    gates_data = getReadingWeekData(temp)
   elif week == "Exam":
-    data = getExamWeekData(temp)
+    gates_data = getExamWeekData(temp)
   elif 1<=week<=13:
-    data, usedBaseline = getNormalWeekData(temp,week)
-  data = checkIfDataOfDayPresent(data,day)
+    gates_data, usedBaseline = getNormalWeekData(temp,week)
+  gates_data = checkIfDataOfDayPresent(gates_data,day)
   if usedBaseline:
-    return math.ceil(data[data["Datetime"].dt.hour == time - 1].groupby(by=["Date"])["occupancy"].mean().mean() * factor[week])
-  return math.ceil(data[data["Datetime"].dt.hour == time - 1].groupby(by=["Date"])["occupancy"].mean().mean())
+    occupancy =  math.ceil(gates_data[gates_data["Datetime"].dt.hour == time - 1].groupby(by=["Date"])["occupancy"].mean().mean() * factor[week])
+  else:
+    occupancy =  math.ceil(gates_data[gates_data["Datetime"].dt.hour == time - 1].groupby(by=["Date"])["occupancy"].mean().mean())
+  return calculate_occupancy_for_level(week,day,time,level,occupancy,levels_survey_data)
 
 
-def create_model_output(data):
+def create_model_output(gates_data,levels_survey_data,seats_survey_data):
   """
   trying every possible combination of week,day,hour in the predict_occupancy function as our model_output, where we will store this dataframe in mysql for fast access
 
@@ -199,65 +237,107 @@ def create_model_output(data):
   Returns:
       a dataframe 
   """
-  model_output = {"week":[],"day" :[], "hour": [], "occupancy" : []}
+  model_output = {"week":[],"day" :[], "hour": [], "level":[], "occupancy" : []}
   #normal weeks
-  for i in range(1,14): #week1-13
-    for j in range(1,6): #monday to friday
-      for z in range(9,22): #9am to 9pm
-        model_output["week"] = model_output["week"] + [i,]
-        model_output["day"] = model_output["day"] + [j,]
-        model_output["hour"] = model_output["hour"] + [z,]
-        model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(i,j,z,data),]
+  for week in range(1,14): #week1-13
+    for day in range(1,6): #monday to friday
+      for time in range(9,22): #9am to 9pm
+        for level in ["3","4","5","6","6Chinese"]:
+          model_output["week"] = model_output["week"] + [week,]
+          model_output["day"] = model_output["day"] + [day,]
+          model_output["hour"] = model_output["hour"] + [time,]
+          model_output["level"] = model_output["level"] + [level,]
+          model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
 
   #recess week
-  for i in ["Recess"]:
-    for j in range(1,7): #monday to saturday
-      if j ==6: 
-        for z in range(10,18): #10am to 5pm
-          model_output["week"] = model_output["week"] + [i,]
-          model_output["day"] = model_output["day"] + [j,]
-          model_output["hour"] = model_output["hour"] + [z,]
-          model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(i,j,z,data),]
+  for week in ["Recess"]:
+    for day in range(1,7): #monday to saturday
+      if day ==6: 
+        for time in range(10,18): #10am to 5pm
+            for level in ["3","4","5","6","6Chinese"]:
+              model_output["week"] = model_output["week"] + [week,]
+              model_output["day"] = model_output["day"] + [day,]
+              model_output["hour"] = model_output["hour"] + [time,]
+              model_output["level"] = model_output["level"] + [level,]
+              model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
       else:
-        for z in range(9,22): #9am to 9pm
-            model_output["week"] = model_output["week"] + [i,]
-            model_output["day"] = model_output["day"] + [j,]
-            model_output["hour"] = model_output["hour"] + [z,]
-            model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(i,j,z,data),]
-
+        for time in range(9,22): #9am to 9pm
+            for level in ["3","4","5","6","6Chinese"]:
+              model_output["week"] = model_output["week"] + [week,]
+              model_output["day"] = model_output["day"] + [day,]
+              model_output["hour"] = model_output["hour"] + [time,]
+              model_output["level"] = model_output["level"] + [level,]
+              model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
   #reading/exam week
-  for i in ["Reading","Exam"]:
-    for j in range(1,8): #since the library 24/7, can allow the user to select monday to sunday
-      for z in range(1,25): # 24 hours
-        model_output["week"] = model_output["week"] + [i,]
-        model_output["day"] = model_output["day"] + [j,]
-        model_output["hour"] = model_output["hour"] + [z,]
-        model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(i,j,z,data),]
+  for week in ["Reading","Exam"]:
+    for day in range(1,8): #since the library 24/7, can allow the user to select monday to sunday
+      if 1<=day<=5:
+        for time in range(1,25):
+          if time > 21 or time < 9: #outside of library opening hours
+            level = "6"
+            model_output["week"] = model_output["week"] + [week,]
+            model_output["day"] = model_output["day"] + [day,]
+            model_output["hour"] = model_output["hour"] + [time,]
+            model_output["level"] = model_output["level"] + [level,]
+            model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
+          else:
+            for level in ["3","4","5","6","6Chinese"]:
+              model_output["week"] = model_output["week"] + [week,]
+              model_output["day"] = model_output["day"] + [day,]
+              model_output["hour"] = model_output["hour"] + [time,]
+              model_output["level"] = model_output["level"] + [level,]
+              model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
+      elif day == 6:
+        for time in range(1,25): # 24 hours
+          if time > 17 or time < 10: #outside of library opening hours
+            level = "6"
+            model_output["week"] = model_output["week"] + [week,]
+            model_output["day"] = model_output["day"] + [day,]
+            model_output["hour"] = model_output["hour"] + [time,]
+            model_output["level"] = model_output["level"] + [level,]
+            model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
+          else:
+            for level in ["3","4","5","6","6Chinese"]:
+              model_output["week"] = model_output["week"] + [week,]
+              model_output["day"] = model_output["day"] + [day,]
+              model_output["hour"] = model_output["hour"] + [time,]
+              model_output["level"] = model_output["level"] + [level,]
+              model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
+      elif day == 7: #library closes on sunday
+        for time in range(1,25):
+          level = "6"
+          model_output["week"] = model_output["week"] + [week,]
+          model_output["day"] = model_output["day"] + [day,]
+          model_output["hour"] = model_output["hour"] + [time,]
+          model_output["level"] = model_output["level"] + [level,]
+          model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
   return pd.DataFrame(model_output)
 
 
 input = pd.read_csv("datasets/clean_df.csv")
-data = add_occupancy(input)
-# the code above take quite long to run...
+levels_survey_data = pd.read_csv("datasets/floor.csv")
+seats_survey_data = pd.read_csv("datasets/chair.csv")
+
+gates_data = add_occupancy(input)
+
 # the starting week of each AY to check at any given date, which week it is (week1-13 or recess or reading/exam)
 # i sorta hard-coded here and it doesnt work if they input data before ay20/21 and after ay26/27
 AY = {2020:pd.Timestamp(2020,8,3),2021:pd.Timestamp(2021,8,2),2022:pd.Timestamp(2022,8,1),2023:pd.Timestamp(2023,8,7),
     2024:pd.Timestamp(2024,8,5),2025:pd.Timestamp(2025,8,4),2026:pd.Timestamp(2026,8,3)}
+
 # the baseline (given) data if we dont have data for that week
-baseline =  data[(data["Date"].dt.month == 1) & (25 <= data["Date"].dt.day) & (data["Date"].dt.day <= 27)] 
+BASELINE =  gates_data[(gates_data["Date"].dt.month == 1) & (25 <= gates_data["Date"].dt.day) & (gates_data["Date"].dt.day <= 27)] 
 
-# if u want test indiviudally
-# week = "Reading"
-# day = 2
-# hour = 17
-# print(predict_occupancy(week,day,hour,data)) 
+#split the max capacity of library into 5 categories, 5. 0-200 people (very empty) | 4. 201-400 | 3. 401-600 | 2. 601-800 | 1. 801-1500 (library is full)
+PRESET_CATEGORY = {5:200,4:400,3:600,2:800,1:1500} # on the assumption that the max library capacity is 1.5k at any given time...
 
-model_output = create_model_output(data)
+#if u want test indiviudally
+#week = "Reading"
+#day = 2
+#hour = 24
+#level = "6" #(level must be a string here)
+#print(predict_occupancy(week,day,hour,level,gates_data,levels_survey_data,seats_survey_data)) 
+
+model_output = create_model_output(gates_data,levels_survey_data,seats_survey_data)
 print(model_output) 
-model_output.to_csv("datasets/model_output.csv",index = False)
-
-
-
-
-
-
+model_output.to_csv("datasets/model_output.csv",index=False)

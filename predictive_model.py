@@ -2,10 +2,10 @@ import pandas as pd
 import numpy as np
 import math
 
-#to see the no of ppl in library at a given time
+#to see the no of ppl in library at a given hour
 def add_occupancy(data):
   """
-  Adds in number of people in the library at a given time
+  Adds in number of people in the library at a given hour
 
   Args:
       the merged entry and exit data
@@ -17,7 +17,7 @@ def add_occupancy(data):
   data["Date"] = pd.to_datetime(data["Date"])
   data = data.copy()
   data["occupancy"] = list(np.zeros(len(data)))
-  # here i add the occupancy column to see the number of ppl in the library at a certain time 
+  # here i add the occupancy column to see the number of ppl in the library at a certain hour 
   for i in range(len(data)):
     if i == 0: #first entry
       data.iloc[0,-1] = 1 
@@ -25,7 +25,6 @@ def add_occupancy(data):
       data.iloc[i,-1] = data.iloc[i-1,-1] + 1
     elif (data.loc[i,"Direction"] == "Exit"): # if entry, occupancy -1
       data.iloc[i,-1] = data.iloc[i-1,-1] -1
-  print(data)
   return data
 
 
@@ -150,45 +149,145 @@ def checkIfDataOfDayPresent(data,day):
     return data[data["Date"].dt.dayofweek <= 4]
   return data[data["Date"].dt.dayofweek == day - 1]
 
-#split the max capacity of library into 5 categories, 5. 0-200 people (very empty) | 4. 201-400 | 3. 401-600 | 2. 601-800 | 1. 801-1500 (library is full)
-PRESET_CATEGORY = {5:200,4:400,3:600,2:800,1:1500} # on the assumption that the max library capacity is 1.5k at any given time...
-def calculate_occupancy_for_level(week,day,time,level,occupancy,levels_survey_data):
+def create_category(data,max_occupancy):
   """
-  for the given week, day, time, we will get the occupancy of the whole building, then from here we use the survey_data to calculate the distribution for each level and times a probability to it
+  from the levels/seat data gathered from the survey, in order to utilize the points system given, we need to split the occupancy into different categories to calculate the probability
 
   Args:
-    object,int,int,object,int,DataFrame
-    level = 3/4/5/6/6Chinese (for chinese library)
+      data (either seats_survey or levels_survey) and the max occupancy for each level / whole library
+
+  Returns:
+      a dictionary consisting {level:{category:number of people}} 
+      for example: {'3': {4: 54.75, 3: 109.5, 2: 164.25, 1: 219.0}, '4': {2: 153.0, 1: 306.0}, '5': {3: 161.0, 2: 322.0, 1: 483.0}, '6': {3: 127.66666666666667, 2: 255.33333333333334, 1: 383.0}, '6Chinese': {3: 53.333333333333336, 2: 106.66666666666667, 1: 160.0}}
+  """
+  #split the max capacity of library into 5 categories, 5. 0-200 people (very empty) | 4. 201-400 | 3. 401-600 | 2. 601-800 | 1. 801-1500 (library is full) (just an example)
+  levels = data["level"].unique()
+  preference = {}
+  for level in levels:
+    num_of_features = data[data["level"] == level]["preference"].max()
+    cat = np.linspace(0,max_occupancy[level],num_of_features+1)[1:] # split the occupancy to different categories
+    temp = {}
+    for i in range(num_of_features,0,-1):
+      temp[i] = cat[num_of_features - i]
+    preference[level] = temp
+  return preference
+
+def calculate_occupancy_for_every_level(week,day,hour,occupancy,levels_survey_data):
+  """
+  for the given week, day, hour, we use the survey_data to calculate the distribution for each level and times a probability to it and
+  getting the occupancy for every level
+
+  Args:
+    object,int,int,int,DataFrame
     levels_survey_data = cleaned data from the survey_data
     
   Returns:
-    an integer
+    a dictionary {level:occupancy_for_that_level}
+    for example: {'6Chinese': 160, '3': 214, '4': 286, '5': 269, '6': 273}
   """
-  #so now lets assume at 5pm the library has a total of 357 people, it would fall into category 4. The level dist will be:
-  #lvl<x> = (v5[lvl<x>]+v4[lvl<x>])/sum(v5+v4) * no. of people
+  #so now lets assume at 5pm the library has a total of 357 people, it would fall into category 4 (from the function create_category). 
+  # The level dist will be: lvl<x> = (v5[lvl<x>]+v4[lvl<x>])/sum(v5+v4) * no. of people
   #e.g lvl3 = (51+32)/[(51+46+53+48+37)+(32+77+45+62+30)] * 357 = 61 people on level 3
-  global PRESET_CATEGORY # on the assumption that the max library capacity is 1.5k at any given time...
-  for category,capacity in PRESET_CATEGORY.items():
-    if occupancy <= capacity:
-      occupancy_category = category
-      break
+  output = {}
+  levels_survey_data = levels_survey_data.copy()  
+  preset_cat = create_category(levels_survey_data,MAX_OCCUPANCY_FOR_THE_LIBRARY)
+  occupancy_category = {}
+  for level,category_occupancy in preset_cat.items():
+    for category,capacity in category_occupancy.items():
+      if occupancy <= capacity:
+        occupancy_category[level]= category
+        break
   # to check if the timeframe interested in is within library opening hours. if it is only apply the probability thing, otherwise only level 6 is open, thus no meaning in calculating the probability
   if week in ["Reading","Exam"] :
     if 1<=day<=5: #weekday
-      if time > 21 or time < 9: #library opens from 9am-9pm
-        return occupancy
+      if hour > 21 or hour < 9: #library opens from 9am-9pm
+        return {"6":occupancy}
     elif day == 6: #saturday
-      if time > 17 or time < 10: #library opens from 10am-5pm
-        return occupancy
+      if hour > 17 or hour < 10: #library opens from 10am-5pm
+        return {"6":occupancy}
     elif day == 7: #library closes at sunday
-      return occupancy
+      return {"6":occupancy}
 
-  probability = levels_survey_data[(levels_survey_data["level"] == level) & (levels_survey_data["preference"] >= occupancy_category)]["value"].sum() / levels_survey_data[levels_survey_data["preference"] >= occupancy_category]["value"].sum()
-  return math.ceil(occupancy * probability)
+  #everything below is to calculate the occupancy for each level
+  occupancy_left = occupancy
+  while len(output) != 5: #while we have not finished distributing the occupancy for every level
+    temp={}
+    maxUsed = False
+    for level,max in MAX_OCCUPANCY_FOR_EACH_LEVEL.items():
+      if level in output: # we have already added this in
+        continue
+      probability = levels_survey_data[(levels_survey_data["level"] == level) & (levels_survey_data["preference"] >= occupancy_category[level])]["value"].sum() / levels_survey_data[levels_survey_data["preference"] >= occupancy_category[level]]["value"].sum()
+      current = math.ceil(occupancy_left*probability)
+      if max <= current: #if the current occupancy is greater than the maximum capacity
+        occupancy_left -= max
+        output[level] = max #assign the maximum occupancy and assume that users will move to other levels
+        levels_survey_data = levels_survey_data[levels_survey_data["level"] != level] #exclude that level's preference and calculate the distribution of the remaining levels all over again
+        maxUsed = True
+        break
+      temp[level] = current #not over max capacity, can add into the final output
+    if not maxUsed: #check if there is any violation
+      output.update(temp)
+  return output
+     
 
-def predict_occupancy(week, day, time, level, gates_data, levels_survey_data, seats_survey_data):
+def calculate_occupancy_for_each_seat_type(occupancy_for_each_level,seats_survey_data):
   """
-  given the interested timeframe(week,day,time) and level, we use the cleaned data(data) to calculate and output the average occupancy of that specific timeframe using historical data
+  from the occupancy of every level, further distributed the occupancy for each seat_type
+
+  Args:
+    dictionary,dataframe
+    seats_survey_data = cleaned data from the survey_data
+    
+  Returns:
+    a dictionary {level:{seat_type:occupancy}}
+    for example: 
+    {'6Chinese': {'Windowed.Seats': 36, 'Diagonal.Seats': 72, 'Cubicle.seats': 52},
+    '3': {'Discussion.Cubicles': 56, 'Soft.seats': 73, 'Moveable.seats': 70},
+    '4': {'Sofa': 32, 'Soft.seats': 268},
+    '5': {'Windowed.Seats': 97, 'X4.man.tables': 156, 'X8.man.tables': 112},
+    '6': {'Diagonal.Seats': 91, 'Cubicle.seats': 87, 'Windowed.Seats': 93}}
+  """
+  #so now lets assume at 5pm the library has a total of 357 people at level 3, then 
+  # The level dist will be: lvl<x> = (v5[lvl<x>]+v4[lvl<x>])/sum(v5+v4) * no. of people
+  #e.g seat_type1 = (51+32)/[(51+46+53+48+37)+(32+77+45+62+30)] * 357 = 61 people on seat_type1, level 3
+  output = {}
+  seats_survey_data = seats_survey_data.copy()  
+  preset_cat = create_category(seats_survey_data,MAX_OCCUPANCY_FOR_EACH_LEVEL)
+  occupancy_category = {}
+  for level, occupancy in occupancy_for_each_level.items():
+    for category,capacity in preset_cat[level].items():
+      if occupancy <= capacity:
+        occupancy_category[level]= category
+        break
+
+  #essential the same method as calculate_occupancy_for_every_level()
+  for level, occupancy in occupancy_for_each_level.items():
+    output[level] = {}
+    unique_seat_types = max_seat[max_seat["level"] == level]["seat_type"].unique()
+    while len(output[level]) != len(unique_seat_types):
+      temp = {}
+      maxUsed = False
+      occupancy_left = occupancy
+      for seat_type in unique_seat_types:
+        if seat_type in output[level]:
+          continue
+        probability = seats_survey_data[(seats_survey_data["level"] == level) & (seats_survey_data["seat_type"] == seat_type) & (seats_survey_data["preference"] >= occupancy_category[level])]["value"].sum() / seats_survey_data[(seats_survey_data["level"] == level) & (seats_survey_data["preference"] >= occupancy_category[level])]["value"].sum()
+        current = math.ceil(occupancy_left*probability)
+        max = max_seat[(max_seat["level"] == level) & (max_seat["seat_type"] == seat_type)]["count"].item()
+        if (max <= current):
+          occupancy_left -= max
+          output[level][seat_type] = max
+          seats_survey_data = seats_survey_data[(seats_survey_data["level"] != level) | (seats_survey_data["seat_type"] != seat_type)] # not (A and B) == not A or not B
+          maxUsed = True
+          break
+        temp[seat_type] = current
+      if not maxUsed:
+        output[level].update(temp)
+  return output
+
+def predict_occupancy(week, day, hour, gates_data, levels_survey_data, seats_survey_data):
+  """
+  given the interested timeframe(week,day,hour) and level, we use the cleaned datas(gates_data,levels_survey_data,seats_survey_data) to calculate and output the all levels and types of seats average occupancy of the specific timeframe using historical data
   
   Args:
       object,int,int,DataFrame
@@ -197,16 +296,26 @@ def predict_occupancy(week, day, time, level, gates_data, levels_survey_data, se
               1-6 for Recess week
               1-7 for Exam/Reading week
         1:Monday ... 7:Sunday
-        time = 9-21 for normal week(1-13) and Recess week (weekday)
+        hour = 9-21 for normal week(1-13) and Recess week (weekday)
               10 - 17 for Recess week (weekend)
               1-24 for Exam/Reading week
         1: 0100hr 2: 0200hr ... 23: 2300hr 24: 0000hr
+        level = 3/4/5/6/6Chinese
+        levels_survey_data = cleaned floor data from survey
+        seats_survey_data = cleaned seat_types data from survey
   Returns:
-      an integer 
+      an dictionary consisting the {level:{seat_type:occupancy}}
+      for example:
+      {'3': {'Discussion.Cubicles': 32, 'Soft.seats': 33, 'Moveable.seats': 20}, 
+      '4': {'Sofa': 32, 'Soft.seats': 157}, 
+      '5': {'Windowed.Seats': 85, 'X4.man.tables': 46, 'X8.man.tables': 29}, 
+      '6': {'Diagonal.Seats': 48, 'Cubicle.seats': 49, 'Windowed.Seats': 45}, 
+      '6Chinese': {'Diagonal.Seats': 34, 'Cubicle.seats': 35, 'Windowed.Seats': 32}}
+
   """
   gates_data = gates_data.copy()
   # since we have such limited data, i assume that the distribution of occupancy for the weeks are almost iid.. and as the weeks get closer to midterms/exam, the number of people in the library would increase
-  # the factor here is to
+  # the factor here is to capture the reality that as it gets closer to exam/midterm, the total occupancy will increase
   factor = {1:0.95,2:0.97,3:1,4:1.03,5:1.05,6:1.1,7:1.1,8:1.05,9:1.06,10:1.06,11:1.18,12:1.2,13:1.3}
   temp = segregrate_data(gates_data)
   usedBaseline = False
@@ -220,105 +329,141 @@ def predict_occupancy(week, day, time, level, gates_data, levels_survey_data, se
   elif 1<=week<=13:
     gates_data, usedBaseline = getNormalWeekData(temp,week)
   gates_data = checkIfDataOfDayPresent(gates_data,day)
-  if usedBaseline:
-    occupancy =  math.ceil(gates_data[gates_data["Datetime"].dt.hour == time - 1].groupby(by=["Date"])["occupancy"].mean().mean() * factor[week])
+  if usedBaseline: #baseline is used, then need to times a factor to consider the case when it gets closer to exam/midterm, the total occupancy will increase
+    occupancy =  math.ceil(gates_data[gates_data["Datetime"].dt.hour == hour - 1].groupby(by=["Date"])["occupancy"].mean().mean() * factor[week])
   else:
-    occupancy =  math.ceil(gates_data[gates_data["Datetime"].dt.hour == time - 1].groupby(by=["Date"])["occupancy"].mean().mean())
-  return calculate_occupancy_for_level(week,day,time,level,occupancy,levels_survey_data)
+    occupancy =  math.ceil(gates_data[gates_data["Datetime"].dt.hour == hour - 1].groupby(by=["Date"])["occupancy"].mean().mean())
+  occupancy_for_each_level = calculate_occupancy_for_every_level(week,day,hour,occupancy,levels_survey_data)
+  return calculate_occupancy_for_each_seat_type(occupancy_for_each_level,seats_survey_data)
 
 
 def create_model_output(gates_data,levels_survey_data,seats_survey_data):
   """
-  trying every possible combination of week,day,hour in the predict_occupancy function as our model_output, where we will store this dataframe in mysql for fast access
+  trying every possible combination of week,day,hour,level,seat_type in the predict_occupancy function as our model_output, where we will store this dataframe in mysql for fast access
 
   Args:
-      the cleaned data
+      the cleaned datas
 
   Returns:
       a dataframe 
   """
-  model_output = {"week":[],"day" :[], "hour": [], "level":[], "occupancy" : []}
+  seat_type_for_each_level ={}
+  global levels
+  for level in levels:
+    seat_type_for_each_level[level] = max_seat[max_seat["level"] == level]["seat_type"].unique()
+  model_output = {"week":[],"day" :[], "hour": [], "level":[], "seat_type":[],"occupancy" : []}
   #normal weeks
   for week in range(1,14): #week1-13
     for day in range(1,6): #monday to friday
-      for time in range(9,22): #9am to 9pm
-        for level in ["3","4","5","6","6Chinese"]:
-          model_output["week"] = model_output["week"] + [week,]
-          model_output["day"] = model_output["day"] + [day,]
-          model_output["hour"] = model_output["hour"] + [time,]
-          model_output["level"] = model_output["level"] + [level,]
-          model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
+      for hour in range(9,22): #9am to 9pm
+        temp = predict_occupancy(week,day,hour,gates_data,levels_survey_data,seats_survey_data)
+        for level in levels:
+          for seat_type in seat_type_for_each_level[level]:
+            model_output["week"] = model_output["week"] + [week,]
+            model_output["day"] = model_output["day"] + [day,]
+            model_output["hour"] = model_output["hour"] + [hour,]
+            model_output["level"] = model_output["level"] + [level,]
+            model_output["seat_type"] = model_output["seat_type"] +[seat_type,]
+            model_output["occupancy"] = model_output["occupancy"] + [temp[level][seat_type],]
 
   #recess week
   for week in ["Recess"]:
     for day in range(1,7): #monday to saturday
       if day ==6: 
-        for time in range(10,18): #10am to 5pm
-            for level in ["3","4","5","6","6Chinese"]:
+        for hour in range(10,18): #10am to 5pm
+          temp = predict_occupancy(week,day,hour,gates_data,levels_survey_data,seats_survey_data)
+          for level in levels:
+            for seat_type in seat_type_for_each_level[level]:
               model_output["week"] = model_output["week"] + [week,]
               model_output["day"] = model_output["day"] + [day,]
-              model_output["hour"] = model_output["hour"] + [time,]
+              model_output["hour"] = model_output["hour"] + [hour,]
               model_output["level"] = model_output["level"] + [level,]
-              model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
+              model_output["seat_type"] = model_output["seat_type"] +[seat_type,]
+              model_output["occupancy"] = model_output["occupancy"] + [temp[level][seat_type],]
+
       else:
-        for time in range(9,22): #9am to 9pm
-            for level in ["3","4","5","6","6Chinese"]:
+        for hour in range(9,22): #9am to 9pm
+          temp = predict_occupancy(week,day,hour,gates_data,levels_survey_data,seats_survey_data)
+          for level in levels:
+            for seat_type in seat_type_for_each_level[level]:
               model_output["week"] = model_output["week"] + [week,]
               model_output["day"] = model_output["day"] + [day,]
-              model_output["hour"] = model_output["hour"] + [time,]
+              model_output["hour"] = model_output["hour"] + [hour,]
               model_output["level"] = model_output["level"] + [level,]
-              model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
+              model_output["seat_type"] = model_output["seat_type"] +[seat_type,]
+              model_output["occupancy"] = model_output["occupancy"] + [temp[level][seat_type],]
   #reading/exam week
   for week in ["Reading","Exam"]:
     for day in range(1,8): #since the library 24/7, can allow the user to select monday to sunday
       if 1<=day<=5:
-        for time in range(1,25):
-          if time > 21 or time < 9: #outside of library opening hours
+        for hour in range(1,25):
+          temp = predict_occupancy(week,day,hour,gates_data,levels_survey_data,seats_survey_data)
+          if hour > 21 or hour < 9: #outside of library opening hours
             level = "6"
-            model_output["week"] = model_output["week"] + [week,]
-            model_output["day"] = model_output["day"] + [day,]
-            model_output["hour"] = model_output["hour"] + [time,]
-            model_output["level"] = model_output["level"] + [level,]
-            model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
-          else:
-            for level in ["3","4","5","6","6Chinese"]:
+            for seat_type in seat_type_for_each_level[level]:
               model_output["week"] = model_output["week"] + [week,]
               model_output["day"] = model_output["day"] + [day,]
-              model_output["hour"] = model_output["hour"] + [time,]
+              model_output["hour"] = model_output["hour"] + [hour,]
               model_output["level"] = model_output["level"] + [level,]
-              model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
+              model_output["seat_type"] = model_output["seat_type"] +[seat_type,]
+              model_output["occupancy"] = model_output["occupancy"] + [temp[level][seat_type],]
+          else:
+            for level in levels:
+              for seat_type in seat_type_for_each_level[level]:
+                model_output["week"] = model_output["week"] + [week,]
+                model_output["day"] = model_output["day"] + [day,]
+                model_output["hour"] = model_output["hour"] + [hour,]
+                model_output["level"] = model_output["level"] + [level,]
+                model_output["seat_type"] = model_output["seat_type"] +[seat_type,]
+                model_output["occupancy"] = model_output["occupancy"] + [temp[level][seat_type],]
       elif day == 6:
-        for time in range(1,25): # 24 hours
-          if time > 17 or time < 10: #outside of library opening hours
+        for hour in range(1,25): # 24 hours
+          temp = predict_occupancy(week,day,hour,gates_data,levels_survey_data,seats_survey_data)
+          if hour > 17 or hour < 10: #outside of library opening hours
             level = "6"
-            model_output["week"] = model_output["week"] + [week,]
-            model_output["day"] = model_output["day"] + [day,]
-            model_output["hour"] = model_output["hour"] + [time,]
-            model_output["level"] = model_output["level"] + [level,]
-            model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
-          else:
-            for level in ["3","4","5","6","6Chinese"]:
+            for seat_type in seat_type_for_each_level[level]:
               model_output["week"] = model_output["week"] + [week,]
               model_output["day"] = model_output["day"] + [day,]
-              model_output["hour"] = model_output["hour"] + [time,]
+              model_output["hour"] = model_output["hour"] + [hour,]
               model_output["level"] = model_output["level"] + [level,]
-              model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
+              model_output["seat_type"] = model_output["seat_type"] +[seat_type,]
+              model_output["occupancy"] = model_output["occupancy"] + [temp[level][seat_type],]
+          else:
+            for level in levels:
+              for seat_type in seat_type_for_each_level[level]:
+                model_output["week"] = model_output["week"] + [week,]
+                model_output["day"] = model_output["day"] + [day,]
+                model_output["hour"] = model_output["hour"] + [hour,]
+                model_output["level"] = model_output["level"] + [level,]
+                model_output["seat_type"] = model_output["seat_type"] +[seat_type,]
+                model_output["occupancy"] = model_output["occupancy"] + [temp[level][seat_type],]
       elif day == 7: #library closes on sunday
-        for time in range(1,25):
+        for hour in range(1,25):
+          temp = predict_occupancy(week,day,hour,gates_data,levels_survey_data,seats_survey_data)
           level = "6"
-          model_output["week"] = model_output["week"] + [week,]
-          model_output["day"] = model_output["day"] + [day,]
-          model_output["hour"] = model_output["hour"] + [time,]
-          model_output["level"] = model_output["level"] + [level,]
-          model_output["occupancy"] = model_output["occupancy"] + [predict_occupancy(week,day,time,level,gates_data,levels_survey_data,seats_survey_data),]
+          for seat_type in seat_type_for_each_level[level]:
+            model_output["week"] = model_output["week"] + [week,]
+            model_output["day"] = model_output["day"] + [day,]
+            model_output["hour"] = model_output["hour"] + [hour,]
+            model_output["level"] = model_output["level"] + [level,]
+            model_output["seat_type"] = model_output["seat_type"] +[seat_type,]
+            model_output["occupancy"] = model_output["occupancy"] + [temp[level][seat_type],]
   return pd.DataFrame(model_output)
 
-
+#reading in all the data required
 input = pd.read_csv("datasets/clean_df.csv")
 levels_survey_data = pd.read_csv("datasets/floor.csv")
 seats_survey_data = pd.read_csv("datasets/chair.csv")
+max_seat = pd.read_csv("datasets/actual_seat_count.csv")
 
-gates_data = add_occupancy(input)
+gates_data = add_occupancy(input) #add occupancy to the data
+
+MAX_OCCUPANCY_FOR_THE_LIBRARY = {}
+MAX_OCCUPANCY_FOR_EACH_LEVEL={}  
+levels = ["3","4","5","6","6Chinese"]
+for level in levels:
+  MAX_OCCUPANCY_FOR_THE_LIBRARY[level] = max_seat["count"].sum()
+  MAX_OCCUPANCY_FOR_EACH_LEVEL[level] = max_seat[max_seat["level"] == level]["count"].sum()
 
 # the starting week of each AY to check at any given date, which week it is (week1-13 or recess or reading/exam)
 # i sorta hard-coded here and it doesnt work if they input data before ay20/21 and after ay26/27
@@ -328,15 +473,12 @@ AY = {2020:pd.Timestamp(2020,8,3),2021:pd.Timestamp(2021,8,2),2022:pd.Timestamp(
 # the baseline (given) data if we dont have data for that week
 BASELINE =  gates_data[(gates_data["Date"].dt.month == 1) & (25 <= gates_data["Date"].dt.day) & (gates_data["Date"].dt.day <= 27)] 
 
-#split the max capacity of library into 5 categories, 5. 0-200 people (very empty) | 4. 201-400 | 3. 401-600 | 2. 601-800 | 1. 801-1500 (library is full)
-PRESET_CATEGORY = {5:200,4:400,3:600,2:800,1:1500} # on the assumption that the max library capacity is 1.5k at any given time...
-
 #if u want test indiviudally
 #week = "Reading"
 #day = 2
 #hour = 24
-#level = "6" #(level must be a string here)
-#print(predict_occupancy(week,day,hour,level,gates_data,levels_survey_data,seats_survey_data)) 
+
+#print(predict_occupancy(week,day,hour,gates_data,levels_survey_data,seats_survey_data)) 
 
 model_output = create_model_output(gates_data,levels_survey_data,seats_survey_data)
 print(model_output) 

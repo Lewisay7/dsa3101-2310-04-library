@@ -18,7 +18,7 @@ def check_occupancy():
     occupancy_rate = calculate_occupancy_rate(timing, level)
     #visualization = generate_visualization(occupancy_rate)
 
-    return render_template('floor.html', result=occupancy_rate, time = timing, level = level, visualization=visualization)
+    return render_template('floor.html', result=occupancy_rate, time = timing, level = level)
 
 def calculate_occupancy_rate(timing, level):
     # Replace this with the occupancy rate calculation logic

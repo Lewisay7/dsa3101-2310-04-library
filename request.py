@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request
 import matplotlib.pyplot as plt
 import plotly as pltly
+import pandas as pd
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/', static_folder='templates')
 
 @app.route('/')
 def index():
@@ -10,14 +11,14 @@ def index():
 
 @app.route('/get_time_level', methods=['POST'])
 def check_occupancy():
-    timing = request.form.get('time')
-    level = request.form.get('level')
+    #timing = request.form.get('time')
+    #level = request.form.get('level')
     
     # Replace the following with the logic to fetch occupancy rate and generate visualizations
-    occupancy_rate = calculate_occupancy_rate(timing, level)
-    visualization = generate_visualization(occupancy_rate)
+    #occupancy_rate = calculate_occupancy_rate(timing, level)
+    #visualization = generate_visualization(occupancy_rate)
 
-    return render_template('floor.html', result=occupancy_rate, visualization=visualization)
+    return render_template('floor.html', result=5)
 
 def calculate_occupancy_rate(timing, level):
     # Replace this with the occupancy rate calculation logic
@@ -41,5 +42,3 @@ def generate_visualization(occupancy_rate):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-

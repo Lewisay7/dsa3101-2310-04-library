@@ -26,6 +26,7 @@
   <main>
     <div class="intro">
       <h1>NUS LibSpace</h1>
+      <h1>{{ result }}</h1>
       <p>A website for you to check occupancy rate</p>
 
     <!-- <form action="/get_time_level" method="POST"> -->
@@ -38,9 +39,10 @@
           <option value="5">Level 5</option>
           <option value="6">Level 6</option>
         </select>
-        <button onclick="checkOccupancy()">Check Occupancy</button>
+        <form action="/get_time_level" method="POST">
+          <button id="checkOccupancyButton" type="submit">Check Occupancy</button>
+        </form>
       </div>
-      </form>
 
       <div id="warningMessage" class="hidden">Please enter a timing and level.</div>
     </div>

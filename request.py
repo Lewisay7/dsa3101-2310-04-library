@@ -11,14 +11,14 @@ def index():
 
 @app.route('/get_time_level', methods=['POST'])
 def check_occupancy():
-    #timing = request.form.get('time')
-    #level = request.form.get('level')
+    timing = request.form.get('time')
+    level = request.form.get('level')
     
     # Replace the following with the logic to fetch occupancy rate and generate visualizations
-    #occupancy_rate = calculate_occupancy_rate(timing, level)
+    occupancy_rate = calculate_occupancy_rate(timing, level)
     #visualization = generate_visualization(occupancy_rate)
 
-    return render_template('floor.html', result=5)
+    return render_template('floor.html', result=occupancy_rate, time = timing, level = level, visualization=visualization)
 
 def calculate_occupancy_rate(timing, level):
     # Replace this with the occupancy rate calculation logic

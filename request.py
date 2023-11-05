@@ -34,7 +34,7 @@ def check_occupancy():
 
 def calculate_occupancy_rate(timing, level):
     # Replace this with the occupancy rate calculation logic
-    return f'Occupancy rate for Level {level} at {timing} is 60%'  # Replace with actual data
+    return f'Occupancy rate for Level {level} at {timing} is not sure'  # Replace with actual data
 
 def generate_visualization(occupancy_rate):
     # Replace this with your visualization generation logic using Matplotlib or Plotly

@@ -256,7 +256,7 @@ def main():
     clean_df = clean_df.sort_values(by = "Datetime")
     clean_df = clean_df[["Direction", "Datetime","Date"]]
     clean_df["Date"] = pd.to_datetime(clean_df["Date"])
-    clean_df.to_csv("datasets/clean_df.csv")
+    clean_df.to_csv("datasets/clean_df.csv", index_label='Index')
 
 if __name__ == '__main__':
     main()

@@ -17,7 +17,43 @@ def check_occupancy():
     occupancy_rate = calculate_occupancy_rate(timing, level)
     visualization = generate_visualization(occupancy_rate)
 
-    return render_template('floor.html', result=occupancy_rate, visualization=visualization)
+    return render_template('overall_view.html', result=occupancy_rate, visualization=visualization)
+
+@app.route('/overall_view')
+def overall_view():
+    timing = request.form.get('time')
+    level = request.form.get('level')
+    floor_data = [
+        {'floor': "Level 3", 'occupancy': 60},
+        { 'floor': "Level 4", 'occupancy': 80 },
+        { 'floor': "Level 5", 'occupancy': 70 },
+        { 'floor': "Level 6", 'occupancy': 90 },
+        { 'floor': "Level 6 (Chinese Library)", 'occupancy': 75 }
+    ]
+    circles=[]
+    for data in floor_data:
+        circle_size = data['occupancy']*2
+
+        circle=pltly.Scatter(
+            x=[0],
+            y=[0],
+            mode='markers',
+            marker=dict(size=circle_size, color='red'),
+            hoverinfo='text',
+            hovertext=f'{data["floor"]}<br>Occupancy: {data["occupancy"]}%'
+        )
+        circles.append(circle)
+
+    figure = plotly.Figure(data=circles)
+    circle_divs = [f.to_html(full_html=False) for f in figure.to_dict()["data"]]
+
+    return render_template('overall_view.html', circle_divs=circle_divs)
+
+@app.route('/floor/<floor>')
+def floor_view(floor):
+    floor = request.form.get('floor')
+
+    return render_template('floor_view.html', floor=floor)
 
 def calculate_occupancy_rate(timing, level):
     # Replace this with the occupancy rate calculation logic

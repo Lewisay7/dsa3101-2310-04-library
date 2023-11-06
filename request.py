@@ -54,7 +54,7 @@ region = {'Windowed.Seats':[[36 ,1220,40,132],[40, 128,136,1308],[144,1224,1212,
                              'X8.man.tables':[[1992,3904,1024,1188],[1300,1828,2528,2700]]}
 student_occupancy = {'Windowed.Seats':30, 'X4.man.tables':20,'X8.man.tables':80}
 
-image_path = '/Users/yg/Downloads/dsa3101-2310-04-library/L5_grayscale_image.jpg'
+image_path = 'floorplan_images/L5_grayscale_image.jpg'
 
 @app.route('/')
 def index():
@@ -76,9 +76,18 @@ def check_occupancy():
 
     # Calculate the total occupancy for the filtered data
     total_occupancy = filtered_df['occupancy'].sum()
+    contour_plot = generate_floorplan_contour(image_path, region, student_occupancy)
 
-    return render_template('overall_view.html', result=occupancy_rate, time = time, level = level, total_occupancy = total_occupancy, week=week, day=day)
+    # Save the contour plot as a PNG image in memory
+    img_buf = io.BytesIO()
+    contour_plot.savefig(img_buf, format='png')
+    img_buf.seek(0)
 
+    # Encode the image as base64
+    import base64
+    img_base64 = base64.b64encode(img_buf.read()).decode()
+
+    return render_template('floor_view.html', result=occupancy_rate, time=time, level=level, total_occupancy=total_occupancy, week=week, day=day, plot=img_base64)
 @app.route('/overall_view')
 def overall_view():
     timing = request.form.get('time')

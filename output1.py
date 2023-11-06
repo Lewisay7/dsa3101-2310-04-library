@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import io
 
 def generate_heatmap(region, image_path, student_occupancy):
     # Load your floor plan image

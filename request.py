@@ -30,7 +30,10 @@ def check_occupancy():
     # Calculate the total occupancy for the filtered data
     total_occupancy = filtered_df['occupancy'].sum()
 
-    return render_template('overall_view.html', result=occupancy_rate, time = time, level = level, total_occupancy = total_occupancy, week=week, day=day)
+
+    # Add code here to create plot
+    # plot = plottt
+    return render_template('floor_view.html', result=occupancy_rate, time = time, level = level, total_occupancy = total_occupancy, week=week, day=day)
 
 @app.route('/overall_view')
 def overall_view():
@@ -60,7 +63,7 @@ def overall_view():
     figure = plotly.Figure(data=circles)
     circle_divs = [f.to_html(full_html=False) for f in figure.to_dict()["data"]]
 
-    return render_template('overall_view.html', circle_divs=circle_divs)
+    return render_template('floor_view.html', circle_divs=circle_divs)
 
 @app.route('/floor/<floor>')
 def floor_view(floor):

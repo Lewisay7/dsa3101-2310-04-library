@@ -1,6 +1,74 @@
 import pandas as pd
 import numpy as np
 import math
+import os
+import pandas as pd
+import sshtunnel
+from sshtunnel import SSHTunnelForwarder
+import mysql.connector
+
+def connect_database_download_data():
+  """
+  Connect to the database and download cleaned data 
+  """
+  config_path = './config.sh'
+  config_vars = {}
+
+  with open(config_path, 'r') as file:
+    for line in file:
+      if line.startswith('#') or '=' not in line:
+          continue
+      key, value = line.split('=', 1)
+      key = key.strip()
+      value = value.strip().strip("'").strip('"')
+      config_vars[key] = value
+
+  ssh_host = config_vars['SSH_HOST']
+  ssh_username = config_vars['SSH_USER']
+  ssh_key_path = config_vars['SSH_KEY_PATH']
+  mysql_host = config_vars['HOST']
+  mysql_user = config_vars['USER']
+  mysql_password = config_vars['PASSWORD']
+  mysql_db = config_vars['DATABASE']
+  local_bind_port = 5000
+  mysql_port = 3306
+  remote_bind_port = mysql_port
+  try:
+    tunnel = SSHTunnelForwarder(
+      (ssh_host, 22),
+      ssh_username=ssh_username,
+      ssh_private_key=ssh_key_path,
+      remote_bind_address=(mysql_host, remote_bind_port),
+      local_bind_address=('127.0.0.1', local_bind_port)
+    )
+    tunnel.start()
+  except Exception as e:
+    exit(1)
+
+  try:
+    connection = mysql.connector.connect(
+      user=mysql_user,
+      password=mysql_password,
+      host='127.0.0.1',
+      port=local_bind_port, 
+      database=mysql_db,
+      use_pure=True
+    )
+
+    if connection.is_connected():
+      cursor = connection.cursor()
+      sample_query = "SELECT * FROM LibraryRecords;"
+      cursor.execute(sample_query)
+      result = cursor.fetchall()
+      df = pd.DataFrame(result, columns=[desc[0] for desc in cursor.description])
+      cursor.close()
+  except mysql.connector.Error:
+      pass
+  finally:
+      if 'connection' in locals() or 'connection' in globals() and connection.is_connected():
+        connection.close()
+      tunnel.stop()
+  return df
 
 #to see the no of ppl in library at a given hour
 def add_occupancy(data):
@@ -16,6 +84,7 @@ def add_occupancy(data):
   data["Datetime"] = pd.to_datetime(data["Datetime"])
   data["Date"] = pd.to_datetime(data["Date"])
   data = data.copy()
+  data = data.sort_values(by=["Datetime"],ignore_index = True)
   data["occupancy"] = list(np.zeros(len(data)))
   # here i add the occupancy column to see the number of ppl in the library at a certain hour 
   for i in range(len(data)):
@@ -451,7 +520,9 @@ def create_model_output(gates_data,levels_survey_data,seats_survey_data):
   return pd.DataFrame(model_output)
 
 #reading in all the data required
-input = pd.read_csv("datasets/clean_df.csv")
+#input = pd.read_csv(datasets/clean_df.csv)
+#before running this, make sure to change the pem file to your directory
+input = connect_database_download_data()
 levels_survey_data = pd.read_csv("datasets/floor.csv")
 seats_survey_data = pd.read_csv("datasets/chair.csv")
 max_seat = pd.read_csv("datasets/actual_seat_count.csv")

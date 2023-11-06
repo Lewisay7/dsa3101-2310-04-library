@@ -26,7 +26,6 @@
   <main>
     <div class="intro">
       <h1>NUS LibSpace</h1>
-      <h1>{{ result }}</h1>
       <p>A website for you to check occupancy rate</p>
 
     <!-- <form action="/get_time_level" method="POST"> -->
@@ -99,7 +98,20 @@
       </form>
 
       <div id="warningMessage" class="hidden">Please enter a timing and level.</div>
+      <br>
+      <br>
+      <div class="fileupload">
+        <h1>Upload a CSV or Excel file:</h1>
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv, .xls, .xlsx">
+            <input type="submit" value="Upload and Convert">
+        </form>
+      </div>
+
     </div>
+
+
+
     <div class="about-clb" id="about-section">
       <div class="about-clb-text">
         <h2>About NUS Central Library</h2>

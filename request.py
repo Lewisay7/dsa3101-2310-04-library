@@ -25,12 +25,12 @@ def check_occupancy():
     #visualization = generate_visualization(occupancy_rate)
 
     # Filter the DataFrame based on the parameters, replace for more filters
-    filtered_df = df[(df['level'] == level) & (df['hour'] == time)]
+    filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week)]
 
     # Calculate the total occupancy for the filtered data
     total_occupancy = filtered_df['occupancy'].sum()
 
-    return render_template('floor_view.html', result=occupancy_rate, time = time, level = level, total_occupancy = total_occupancy, week=week, day=day)
+    return render_template('overall_view.html', result=occupancy_rate, time = time, level = level, total_occupancy = total_occupancy, week=week, day=day)
 
 @app.route('/overall_view')
 def overall_view():

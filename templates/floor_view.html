@@ -96,11 +96,10 @@
         <p>Time: {{ time }}</p>
         <p>Level: {{ level }}</p>
         <p>Total Occupancy filtered by Time and Level = {{ total_occupancy }}</p>
-        <p>{{ plot }}</p>
-        <img src="data:image/png;base64, {{ plot }}" alt="Contour Plot">
     </main>
   
     <footer class="footer">
+      <img src="data:image/png;base64, {{ plot }}" alt="Contour Plot">
         <div class="copy">&copy; NUSLibSpace</div>
         <div class="bottom-links">
           <div class="links">

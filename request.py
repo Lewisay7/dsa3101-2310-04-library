@@ -145,7 +145,22 @@ def generate_visualization(occupancy_rate):
 
     return 'occupancy_plot.png'  # Return the filename of the generated plot
 
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' in request.files:
+        uploaded_file = request.files['file']
+        if uploaded_file.filename != '':
+            # Processing here
+
+            # Print a success message
+            print(f'Successfully uploaded: {uploaded_file.filename}')
+
+            # You can also return a response to the client
+            return 'File uploaded successfully'
+    
+    return 'No file provided for upload'
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port="5500",debug=True)
 
 

@@ -14,7 +14,7 @@
 
 <body>
   <header class="header">
-    <a href="#" class="logo"> NUS
+    <a href="https://nus.edu.sg/nuslibraries/spaces/our-libraries/central-library" class="logo"> NUS
     </a>
     <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b9/NUS_coat_of_arms.svg/1280px-NUS_coat_of_arms.svg.png" alt="me">
     <nav class="nav-items">
@@ -93,7 +93,7 @@
             <option value="5">Level 5</option>
             <option value="6">Level 6</option>
           </select>
-          <button id="checkOccupancyButton" type="submit">Check Occupancy</button>
+          <button id="checkOccupancyButton" type="submit" onclick="checkOccupancy()">Check Occupancy</button>
         </div>
       </form>
 
@@ -151,6 +151,8 @@
       // Get the value from the timing input field
       const timingInput = document.getElementById("time").value;
       const levelInput = document.getElementById("level").value;
+      const weekInput = document.getElementById("week").value;
+      const dayInput = document.getElementById("day").value;
   
       // Check if the input is empty
       if (timingInput === "" || levelInput === "") {

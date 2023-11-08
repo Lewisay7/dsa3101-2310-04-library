@@ -72,7 +72,7 @@ def check_occupancy():
     occupancy_rate = calculate_occupancy_rate(time, level)
     #visualization = generate_visualization(occupancy_rate)
 
-    total_occupancy = calculate_total_occupancy(df, level, time, week)
+    total_occupancy = calculate_total_occupancy(df, level, time, week,day)
     contour_plot = generate_floorplan_contour(image_path, region, student_occupancy)
 
     # Save the contour plot as a PNG image in memory
@@ -125,7 +125,7 @@ def calculate_occupancy_rate(timing, level):
     # Replace this with the occupancy rate calculation logic
     return f'Occupancy rate for Level {level} at {timing} is not sure'  # Replace with actual data
 
-def calculate_total_occupancy(df,level,time,week):
+def calculate_total_occupancy(df,level,time,week,day):
     # Filter the DataFrame based on the parameters, replace for more filters
     filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
 

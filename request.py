@@ -56,7 +56,7 @@ student_occupancy = {'Windowed.Seats':30, 'X4.man.tables':20,'X8.man.tables':80}
 
 image_path = 'floorplan_images/L5_grayscale_image.jpg'
 
-@app.route('/')
+@app.route('/',methods=['POST','GET'])
 def index():
     return render_template('home.html')
 
@@ -76,17 +76,17 @@ def check_occupancy():
 
     # Calculate the total occupancy for the filtered data
     total_occupancy = filtered_df['occupancy'].sum()
-    contour_plot = generate_floorplan_contour(image_path, region, student_occupancy)
+    #contour_plot = generate_floorplan_contour(image_path, region, student_occupancy)
 
-    # Save the contour plot as a PNG image in memory
-    img_buf = io.BytesIO()
-    contour_plot.savefig(img_buf, format='png')
-    img_buf.seek(0)
+    # # Save the contour plot as a PNG image in memory
+    # img_buf = io.BytesIO()
+    # contour_plot.savefig(img_buf, format='png')
+    # img_buf.seek(0)
 
-    # Encode the image as base64
-    import base64
-    img_base64 = base64.b64encode(img_buf.read()).decode()
-    return render_template('floor_view.html', result=occupancy_rate, time=time, level=level, total_occupancy=total_occupancy, week=week, day=day, plot=img_base64)
+    # # Encode the image as base64
+    # import base64
+    # img_base64 = base64.b64encode(img_buf.read()).decode()
+    return render_template('floor_view.html', result=occupancy_rate, time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
 
 
 @app.route('/overall_view')
@@ -147,20 +147,22 @@ def generate_visualization(occupancy_rate):
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'file' in request.files:
-        uploaded_file = request.files['file']
-        if uploaded_file.filename != '':
-            # Processing here
+    if request.method == 'POST': 
+        print(request.files)
+    # if 'file' in request.files:
+    #     uploaded_file = request.files['file']
+    #     if uploaded_file.filename != '':
+    #         # Processing here
 
-            # Print a success message
-            print(f'Successfully uploaded: {uploaded_file.filename}')
+    #         # Print a success message
+    #         print(f'Successfully uploaded: {uploaded_file.filename}')
 
-            # You can also return a response to the client
-            return 'File uploaded successfully'
+    #         # You can also return a response to the client
+    #         return 'File uploaded successfully'
     
-    return 'No file provided for upload'
+    return render_template('floor_view.html')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port="5500",debug=True)
+    app.run( port="5500",debug=True)
 
 

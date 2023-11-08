@@ -56,18 +56,18 @@ body {
   }
 
   .intro h1 {
-    font-family: sans-serif;
+    font-family: Times New Roman;
     font-size: 90px;
     color: #fff;
     font-weight: bold;
-    text-transform: uppercase;
+    text-transform:uppercase;
     margin: 0;
   }
 
   .intro p {
-    font-size: 20px;
+    font-size: 30px;
     color: #d1d1d1;
-    text-transform: uppercase;
+    text-transform: none;
     margin: 20px 0;
   }
 
@@ -121,7 +121,8 @@ body {
       margin: 0 10px;
   }
 #warningMessage {
-color :#d1d1d1;
+  color :#d1d1d1;
+  font-size: 16px;
 }
   /* Style the file upload container */
 .fileupload {

@@ -61,7 +61,7 @@ end
 
 
 to setup-data
-  py:run "data =pd.read_csv('datasets/agent_based_data.csv')"
+  py:run "data =pd.read_csv('datasets/model_output.csv')"
 
 end
 
@@ -270,7 +270,7 @@ CHOOSER
 day
 day
 1 2 3 4 5 6 7
-0
+1
 
 INPUTBOX
 0
@@ -278,7 +278,7 @@ INPUTBOX
 124
 159
 hour
-9.0
+17.0
 1
 0
 Number
@@ -337,10 +337,12 @@ day
 ## WHAT IS IT?
 
 (a general understanding of what the model is trying to show or explain)
+This model tries to model out behaviours of students in occupying a space in the Central Library, each square box represents a level, starting from the bottom left to the right (3,4,5,6,6Chinese)
 
 ## HOW IT WORKS
 
 (what rules the agents use to create the overall behavior of the model)
+each tick represents an hour, make sure to change the tick speed if you are pressing go (infinity)
 
 ## HOW TO USE IT
 
@@ -354,9 +356,12 @@ day
 
 (suggested things for the user to try to do (move sliders, switches, etc.) with the model)
 
+
 ## EXTENDING THE MODEL
 
 (suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
+can try to model out the gates congestion during different times (early morning, lunchtime, closing hours) and see how fast/efficient the gates are?
+properly code out the functions (tendency to share table, chope seats, ??)
 
 ## NETLOGO FEATURES
 

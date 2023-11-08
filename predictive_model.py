@@ -107,18 +107,12 @@ def segregrate_data(data):
   Returns:
       a dictionary , where the keys are the academic years(i.e for AY22/23 its 2022) and the values are the filtered data  
   """
-  unique_years = list(data["Date"].dt.year.unique())
   output={}
-  for years in unique_years:
-    #here we check which AY is it in
-    #for example we have 2023-12-01, then unique_years = 2023, so there are two possibilites, either it is in AY22/23 or AY23/24
-    #then for different academic year we have different way of calculating the difference of the week and the starting date of the ay, read the function below(getRecessWeekData) to understand why its important
-    temp1 = data[(AY[years-1]<= data["Date"]) & (data["Date"] < AY[years])] #22/23
-    temp2 = data[(AY[years]<= data["Date"]) & (data["Date"] < AY[years + 1])] #23/24
-    if not (temp1.empty):
-      output[years - 1] = temp1
-    if not(temp2.empty):
-      output[years] = temp2
+  #tfor different academic year we have different way of calculating the difference of the week and the starting date of the ay, read the function below(getRecessWeekData) to understand why its important
+  for year,endingdate in AYendingdate.items():
+    temp = data[(data["Date"] <= endingdate) & (AYstartingdate[year]<=data["Date"])]
+    if not(temp.empty):
+      output[year] = temp
   return output
 
 def getRecessWeekData(data):
@@ -138,8 +132,8 @@ def getRecessWeekData(data):
     #we are calculating the difference of weeks of that particular day and the starting date of the ay (since the starting week of the ay is always the first week of august, then from there we can tell what week this date is on)
     #the numbers here represent the difference of weeks between the starting/ending date of recess week and the first date of the ay (where i already pre-hand computed)
     #and since the two semester of the ay are 22 weeks apart, so we check if its either in sem1's recess week or in sem2's recess week and include it in
-    temp = AYdata[((6.714285714285714 <= ((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W')) < 8)) |
-                  ((28.714285714285714 <= ((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W')) < 30)) ]
+    temp = AYdata[((6.714285714285714 <= ((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W')) < 8)) |
+                  ((28.714285714285714 <= ((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W')) < 30)) ]
     if not (temp.empty):
       output = pd.concat([output,temp],ignore_index = True)
   return output
@@ -157,8 +151,8 @@ def getNormalWeekData(data,week):
   """
   output = pd.DataFrame()
   for years,AYdata in data.items():
-    temp = AYdata[((week <= ((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W')) < week + 0.7142857142857143)) |
-                  ((week + 22 <= ((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W')) < week + 22.7142857142857143)) ]
+    temp = AYdata[((week <= ((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W')) < week + 0.7142857142857143)) |
+                  ((week + 22 <= ((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W')) < week + 22.7142857142857143)) ]
     if not (temp.empty):
       output = pd.concat([output,temp],ignore_index = True)
   # if we dont have data for that particular week, we will just use the baseline data.
@@ -178,8 +172,8 @@ def getReadingWeekData(data):
   """
   output = pd.DataFrame()
   for years, AYdata in data.items():
-    temp = AYdata[((14.714285714285714 <= ((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W')) < 15.714285714285714)) |
-                  ((36.714285714285714 <= ((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W')) < 37.714285714285714))]
+    temp = AYdata[((14.714285714285714 <= ((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W')) < 15.714285714285714)) |
+                  ((36.714285714285714 <= ((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W')) < 37.714285714285714))]
     if not (temp.empty):
       output = pd.concat([output,temp],ignore_index = True)
   return output
@@ -196,8 +190,8 @@ def getExamWeekData(data):
   """
   output = pd.DataFrame()
   for years,AYdata in data.items():
-    temp = AYdata[((15.714285714285714 <= ((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W')) < 17.857142857142858))|
-                  ((37.714285714285714 <= ((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AY[years]) / np.timedelta64(1,'W')) < 39.857142857142858))]
+    temp = AYdata[((15.714285714285714 <= ((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W')) < 17.857142857142858))|
+                  ((37.714285714285714 <= ((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W'))) & (((AYdata["Date"] - AYstartingdate[years]) / np.timedelta64(1,'W')) < 39.857142857142858))]
     if not (temp.empty):
       output = pd.concat([output,temp],ignore_index = True)
   return output
@@ -536,13 +530,16 @@ for level in levels:
   MAX_OCCUPANCY_FOR_THE_LIBRARY[level] = max_seat["count"].sum()
   MAX_OCCUPANCY_FOR_EACH_LEVEL[level] = max_seat[max_seat["level"] == level]["count"].sum()
 
-# the starting week of each AY to check at any given date, which week it is (week1-13 or recess or reading/exam)
-# i sorta hard-coded here and it doesnt work if they input data before ay20/21 and after ay26/27
-AY = {2020:pd.Timestamp(2020,8,3),2021:pd.Timestamp(2021,8,2),2022:pd.Timestamp(2022,8,1),2023:pd.Timestamp(2023,8,7),
+# the starting date of each AYstartingdate to check at any given date, which AY and week it belongs to (week1-13 or recess or reading/exam)
+AYstartingdate = {2019:pd.Timestamp(2019,8,5),2020:pd.Timestamp(2020,8,3),2021:pd.Timestamp(2021,8,2),2022:pd.Timestamp(2022,8,1),2023:pd.Timestamp(2023,8,7),
     2024:pd.Timestamp(2024,8,5),2025:pd.Timestamp(2025,8,4),2026:pd.Timestamp(2026,8,3)}
+# the ending date of each AY to check at any given date, which AY it belongs to
+AYendingdate = {2019:pd.Timestamp(2020,5,9),2020:pd.Timestamp(2021,5,8),2021:pd.Timestamp(2022,5,7),2022:pd.Timestamp(2023,5,6),2023:pd.Timestamp(2024,5,11),
+    2024:pd.Timestamp(2025,5,10),2025:pd.Timestamp(2026,5,9),2026:pd.Timestamp(2027,5,8)}
+# i sorta hard-coded here and it doesnt work if they input data before ay19/20 and after ay26/27
 
 # the baseline (given) data if we dont have data for that week
-BASELINE =  gates_data[(gates_data["Date"].dt.month == 1) & (25 <= gates_data["Date"].dt.day) & (gates_data["Date"].dt.day <= 27)] 
+BASELINE =  gates_data[(gates_data["Date"].dt.year == 2023) & (gates_data["Date"].dt.month == 1) & (25 <= gates_data["Date"].dt.day) & (gates_data["Date"].dt.day <= 27)] 
 
 #if u want test indiviudally
 #week = "Reading"

@@ -72,11 +72,7 @@ def check_occupancy():
     occupancy_rate = calculate_occupancy_rate(time, level)
     #visualization = generate_visualization(occupancy_rate)
 
-    # Filter the DataFrame based on the parameters, replace for more filters
-    filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week)]
-
-    # Calculate the total occupancy for the filtered data
-    total_occupancy = filtered_df['occupancy'].sum()
+    total_occupancy = calculate_total_occupancy(df, level, time, week)
     contour_plot = generate_floorplan_contour(image_path, region, student_occupancy)
 
     # Save the contour plot as a PNG image in memory
@@ -129,21 +125,13 @@ def calculate_occupancy_rate(timing, level):
     # Replace this with the occupancy rate calculation logic
     return f'Occupancy rate for Level {level} at {timing} is not sure'  # Replace with actual data
 
-def generate_visualization(occupancy_rate):
-    # Replace this with your visualization generation logic using Matplotlib or Plotly
-    # Example: generate a simple bar chart
+def calculate_total_occupancy(df,level,time,week):
+    # Filter the DataFrame based on the parameters, replace for more filters
+    filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
 
-    levels = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5', 'Level 6']
-    occupancy_data = [60, 45, 75, 80, 70, 55]  # Replace with actual data
-
-    plt.bar(levels, occupancy_data)
-    plt.xlabel('Levels')
-    plt.ylabel('Occupancy Rate')
-    plt.title('Occupancy Rate by Level')
-    plt.savefig('static/occupancy_plot.png')  # Save the plot as a file
-    plt.close()
-
-    return 'occupancy_plot.png'  # Return the filename of the generated plot
+    # Calculate the total occupancy for the filtered data
+    occupancy = filtered_df['occupancy'].sum()
+    return occupancy
 
 if __name__ == '__main__':
     app.run(debug=True)

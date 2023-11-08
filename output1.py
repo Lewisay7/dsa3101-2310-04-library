@@ -47,22 +47,18 @@ def generate_floorplan_contour(image_path, region, student_occupancy):
     x_range = np.arange(image.shape[1])
     y_range = np.arange(image.shape[0])
     xx, yy = np.meshgrid(x_range, y_range)
-    
+
     # Create an array for contour data
     contour_data = np.zeros_like(xx, dtype=np.float32)
-    
+
     for seat_type, coordinates_list in region.items():
         for x1, x2, y1, y2 in coordinates_list:
             student_count = student_occupancy.get(seat_type, 0)
             # Update the corresponding region in the contour data
             contour_data[y1:y2 + 1, x1:x2 + 1] = student_count
 
-
     # Apply Gaussian blur to the contour data
     contour_data = cv2.GaussianBlur(contour_data, ksize=(251, 251), sigmaX=25, sigmaY=25)
-
-    # Apply the mask to make regions with 0 students transparent
-    #contour_data *= mask
 
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.imshow(image)
@@ -71,7 +67,9 @@ def generate_floorplan_contour(image_path, region, student_occupancy):
     contours = ax.pcolormesh(xx, yy, contour_data, cmap="jet", alpha=0.9)
 
     ax.set_title('Contour Plot')
-    plt.show()
+
+    # Return the plot
+    return fig
 
 '''
 generate_floorplan_contour(image_path, region, student_occupacy)

@@ -276,3 +276,12 @@ form#level input[type="submit"]:hover {
     border-radius: 5px;
   }
   
+  @media (max-width: 768px) {
+    .col img {
+        width: 200px;
+      }
+    
+    .barplot {
+    width: 500px; /* Set a fixed width for the container */
+    }
+  }

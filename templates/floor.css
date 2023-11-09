@@ -48,7 +48,7 @@ body {
     flex-direction: column;
     justify-content: center;
     text-align: center;
-    height: 1600px;
+    height: 2000px;
     /* background: url("https://img.freepik.com/premium-vector/gradient-modern-design-abstract-background-color_103282-920.jpg"); */
     background : linear-gradient(to bottom, rgba(185, 175, 175, 0.1) 0%, rgba(243, 223, 223, 0.3) 100%), url("https://img.freepik.com/premium-vector/gradient-modern-design-abstract-background-color_103282-920.jpg");
     background-size: cover;
@@ -209,14 +209,15 @@ form#level input[type="submit"]:hover {
 
 /*styling for total number of students at floor_view html*/
 
-.occupancy_result{
+.occupancy_result p{
   margin: 0;
-  color : #2676b7;
-
+  color:#053F5C;
+  font-size: 40px;
 }
 
 .number {
   color: rgb(244, 22, 22);
+  font-size: 45px;
   
 }
 
@@ -253,6 +254,35 @@ form#level input[type="submit"]:hover {
     left: 50%; /* Center the span horizontally */
     transform: translateX(-50%); /* Center the span precisely */
     font-size: 18px; /* Adjust font size as needed */
+    color: #fff; /* Set text color */
+    background-color: rgba(0, 0, 0, 0.7); /* Add a semi-transparent background for better readability */
+    padding: 5px; /* Add padding for better visual appearance */
+    white-space: nowrap; /* Prevent text from wrapping */
+    margin-top: 0;
+  }
+
+  .barplot {
+    width: 1000px; /* Set a fixed width for the container */
+    margin: 0 auto; /* Center the container horizontally */
+    display: flex;
+    flex-wrap: wrap; /* Allow images to wrap to the next line */
+    align-items: center;
+    position: relative; /* Position relative for absolute positioning of span */
+  }
+  
+  .barplot img {
+    max-width: 100%; /* Ensure images don't exceed the width of their container */
+    width: 100%;
+    height: auto; /* Maintain aspect ratio */
+    padding: 20px;
+  }
+  
+  .barplot span {
+    position: absolute;
+    top: -20px; /* Position the span at the top of the container */
+    left: 50%; /* Center the span horizontally */
+    transform: translateX(-50%); /* Center the span precisely */
+    font-size: 25px; /* Adjust font size as needed */
     color: #fff; /* Set text color */
     background-color: rgba(0, 0, 0, 0.7); /* Add a semi-transparent background for better readability */
     padding: 5px; /* Add padding for better visual appearance */

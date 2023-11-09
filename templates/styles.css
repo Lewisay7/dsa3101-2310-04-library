@@ -348,3 +348,30 @@ box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.4);
 .fileupload input[type="submit"]:hover {
 background-color: #2676b7;
 }
+
+/*styling for total number of students at floor_view html*/
+
+.occupancy_result{
+  margin: 0;
+  color : #2676b7;
+
+}
+
+.number {
+  color: rgb(244, 22, 22);
+  
+}
+
+/*heatmaps plots*/
+.heatmaps {
+  display: flex;
+  flex-wrap: wrap;
+}
+.row {
+  width: 100%;
+  display: flex;
+}
+.col {
+  flex: 1;
+  margin: 10px;
+}

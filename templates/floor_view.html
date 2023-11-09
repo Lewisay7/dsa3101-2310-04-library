@@ -52,7 +52,6 @@
               <option value="6">Saturday</option>
               <option value="7">Sunday</option>
             </select>
-            <!--input type="time" id="time" name="time" step = "3600"-->
             <select id="time" name="time">
               <option value="1">1 AM</option>
               <option value="2">2 AM</option>
@@ -78,7 +77,6 @@
               <option value="22">10 PM</option>
               <option value="23">11 PM</option>
               <option value="24">12 AM</option>
-              
             </select>
             <select id="level" name="level">
               <option value="3">Level 3</option>
@@ -90,12 +88,29 @@
             <button id="checkOccupancyButton" type="submit">Check Occupancy</button>
           </div>
         </form>
-        <p>{{ result }}</p>
+        <div class = "occupancy_result">
+          <p>Total Number of Students on Week 9, Wednesday, 2pm is 
+            <br>
+            <span class="number">1000</span>
+          </p>
+        </div>
+        <div class="heatmaps">
+          <div class="row">
+              <div class="col"><img src="/mock_heatmap/Level_3.png" alt="Plot 1"></div>
+              <div class="col"><img src="/mock_heatmap/Level_4.png" alt="Plot 2"></div>
+              <div class="col"><img src="" alt="/mock_heatmap/Level_5.png"></div>
+          </div>
+          <div class="row">
+              <div class="col"><img src="/mock_heatmap/Level_6.png" alt="Plot 4"></div>
+              <div class="col"><img src="" alt="/mock_heatmap/Level_6C.png"></div>
+        </div>
+      </div>
+        <!-- <p>{{ result }}</p>
         <p>Week: {{ week }}</p>
         <p>Day: {{ day }}</p>
         <p>Time: {{ time }}</p>
         <p>Level: {{ level }}</p>
-        <p>Total Occupancy filtered by Time and Level = {{ total_occupancy }}</p>
+        <p>Total Occupancy filtered by Time and Level = {{ total_occupancy }}</p> -->
     </main>
   
     <footer class="footer">

@@ -237,6 +237,7 @@ form#level input[type="submit"]:hover {
     flex: 1;
     margin: 10px;
     text-align: center; /* Center the images within the columns */
+    position: relative; /* Position relative for absolute positioning of span */
   }
   
   .col img {
@@ -247,11 +248,13 @@ form#level input[type="submit"]:hover {
   
   .col span {
     position: absolute;
-    bottom: 100%; /* Position the span just above the image */
+    top: 0; /* Position the span at the top of the container */
     left: 50%; /* Center the span horizontally */
     transform: translateX(-50%); /* Center the span precisely */
-    font-size: 14px; /* Adjust font size as needed */
+    font-size: 18px; /* Adjust font size as needed */
     color: #fff; /* Set text color */
     background-color: rgba(0, 0, 0, 0.7); /* Add a semi-transparent background for better readability */
     padding: 5px; /* Add padding for better visual appearance */
+    white-space: nowrap; /* Prevent text from wrapping */
   }
+  

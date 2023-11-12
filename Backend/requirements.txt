@@ -1,0 +1,7 @@
+pandas
+numpy
+requests
+mysql-connector-python==8.2.0
+sshtunnel
+matplotlib
+plotly

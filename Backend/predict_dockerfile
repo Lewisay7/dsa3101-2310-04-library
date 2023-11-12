@@ -1,0 +1,15 @@
+# base image
+FROM python:3.10.6-slim-buster
+
+# Set directory to /app
+WORKDIR /app
+
+# Copy scripts into /app
+COPY predictive_model.py requirements.txt config.sh DSA3101-2310-04-lib.pem .
+
+# Install dependencies
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
+
+# Entrypoint
+ENTRYPOINT python -u -m predictive_model

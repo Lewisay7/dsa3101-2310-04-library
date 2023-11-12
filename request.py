@@ -29,6 +29,7 @@ def check_occupancy():
     # Three different graphs, comment out the ones you don't want
     occupancy_by_time(level, time, week, day)
     occupancy_by_level(time, week, day)
+    occupancy_by_seat(level, time, week, day)
     
 
     return render_template('floor_view.html', result=occupancy_rate, time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
@@ -156,7 +157,45 @@ def occupancy_by_level(time, week, day):
 
     fig.show()
 
-# Generate a barplot of 
+# Generate a barplot of Occupancy by seats at a specific level
+def occupancy_by_seat(level, time, week, day):
+    plot1y = []
+    x_names= []
+    colors = ['#053F5C', '#429EBD', '#9FE7F5', '#F7AD19', '#F27F0C']
+
+    #Find seat types for current level
+    list1 = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
+    seat_filter = pd.Series(list1["seat_type"]).drop_duplicates().tolist()
+    print(seat_filter)
+    print
+
+    #Give nicer names to current seat types
+    seat_names = {"Discussion.Cubicles": "Discussion Cubicles", "Soft.seats" : "Soft Seats", "Moveable.seats": "Moveable Seats",
+                  "Sofa":"Sofa","Windowed.Seats":"Windowed Seats","X4.man.tables":"4 Man Tables","X8.man.tables":"8 Man Tables",
+                  "Diagonal.Seats": "Diagonal Seats","Cubicle.seats":"Cubicle Seats"}
+    
+    #Find occupancy by seat types
+    for i in seat_filter:
+        filtered_df = list1[(df['seat_type'] == i) ]
+        # Calculate the total occupancy for the filtered data
+        fil = filtered_df['occupancy'].sum()
+        plot1y.append(fil)
+        #Retrieve nicer name format from dictionary
+        x_names.append(seat_names.get(i))
+
+    # Plot graph
+    fig = go.Figure(data=go.Bar(x=seat_filter, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=34),textfont_size=24))
+    # Add labels and title
+    fig.update_layout( xaxis_title="", yaxis_title=dict(text = 'Occupancy', font=dict(size=30)),plot_bgcolor='white')
+    new_tick_values = x_names
+    fig.update_xaxes(type='category', tickmode='array', tickvals=seat_filter, ticktext=new_tick_values,tickfont=dict(size=30))
+    fig.update_yaxes(tickfont=dict(size=20))
+    fig.update_traces(
+    textposition='outside',  
+    textfont=dict(size=24, color='black')
+    ,marker_color=colors)
+
+    fig.show()
 
 if __name__ == '__main__':
     app.run(debug=True)

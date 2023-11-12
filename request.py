@@ -69,13 +69,14 @@ def check_occupancy():
 
         #heatmap plot
 
-        region = regions_coordinates[level]
-        students = form_seat_types_occupancy(df,level,time,week,day)
-        image_path = greyscale_images[level]
-        image = cv2.imread(image_path)
-        heatmap_floor = generate_floorplan_contour(image, region, students)
-        return render_template('floor_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
-    return render_template('home.html')
+    # region = regions_coordinates[level]
+    # students = form_seat_types_occupancy(df,level,time,week,day)
+    # image_path = greyscale_images[level]
+    # image = cv2.imread(image_path)
+    # heatmap_floor = generate_floorplan_contour(image, region, students)
+    
+
+    return render_template('floor_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
 
 
 @app.route('/overall_view')

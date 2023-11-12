@@ -63,9 +63,9 @@ def check_occupancy():
     form_seat_types_occupancy(df, level,time,week,day)
 
     # Three different graphs, comment out the ones you don't want
-    time_barplot = occupancy_by_time(level, time, week, day)
-    level_barplot = occupancy_by_level(time, week, day)
-    seat_barplot = occupancy_by_seat(level, time, week, day)
+    occupancy_by_time(level, time, week, day)
+    occupancy_by_level(time, week, day)
+    occupancy_by_seat(level, time, week, day)
 
     #heatmap plot
 
@@ -76,7 +76,7 @@ def check_occupancy():
     heatmap_floor = generate_floorplan_contour(image, region, students)
     
 
-    return render_template('floor_view.html', result=occupancy_rate, time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
+    return render_template('floor_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
 
 
 @app.route('/overall_view')
@@ -163,7 +163,8 @@ def occupancy_by_time(level, time, week, day):
     textfont=dict(size=24, color='black')
     ,marker_color=col)
 
-    fig.show()
+    fig.write_html("templates/occupancy_by_time.html")
+    #fig.show()
 
 # Generate a barplot of Occupancy by Level
 def occupancy_by_level(time, week, day):
@@ -191,7 +192,8 @@ def occupancy_by_level(time, week, day):
     textfont=dict(size=24, color='black')
     ,marker_color=colors)
 
-    fig.show()
+    fig.write_html("templates/occupancy_by_level.html")
+    #fig.show()
 
 # Generate a barplot of Occupancy by seats at a specific level
 def occupancy_by_seat(level, time, week, day):
@@ -231,7 +233,8 @@ def occupancy_by_seat(level, time, week, day):
     textfont=dict(size=24, color='black')
     ,marker_color=colors)
 
-    fig.show()
+    fig.write_html("templates/occupancy_by_seat.html")
+    #fig.show()
 
 if __name__ == '__main__':
     app.run(debug=True)

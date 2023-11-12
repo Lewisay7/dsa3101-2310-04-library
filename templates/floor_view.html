@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LibSpace</title>
     <script src="https://kit.fontawesome.com/53d0e98b35.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="floor.css">
 </head>
@@ -108,15 +109,10 @@
           <div class="barplot">
             <img src="/mock_heatmap/barplot.png" alt="Level 6"><span>Overall Breakdown</span>
           </div>
-          
-
+          <div id="tester" style="width:90%;height:250px;">
+          </div>
         </div> 
-        <!--  <p>{{ result }}</p>
-        <p>Week: {{ week }}</p>
-        <p>Day: {{ day }}</p>
-        <p>Time: {{ time }}</p>
-        <p>Level: {{ level }}</p>
-        <p>Total Occupancy filtered by Time and Level = {{ total_occupancy }}</p>  -->
+  
       </div>
     </main>
   
@@ -137,5 +133,16 @@
           </div>
         </div>
       </footer>
+
+      <script>
+        TESTER = document.getElementById('tester');
+        Plotly.newPlot(TESTER, [{
+            x: [1, 2, 3, 4, 5],
+            y: [1, 2, 4, 8, 16]
+        }], {
+            margin: { t: 0 }
+        });
+        console.log(Plotly.BUILD);
+      </script>
 </body>
 </html>

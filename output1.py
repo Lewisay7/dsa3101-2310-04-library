@@ -1,9 +1,19 @@
-import cv2
-import numpy as np
 import matplotlib.pyplot as plt
-import io
+import numpy as np
+import random
+import cv2
+import pandas as pd
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.ticker import MaxNLocator
+
 
 def generate_floorplan_contour(image, region, students):
+    # Define a custom colormap with colors corresponding to student counts
+    # Adjust the color_list to your preferred colors
+    color_list = ['#00FFFF', '#00FF00', '#7FFF00', '#FFFF00', '#FFA500', '#FF6347', '#FF4500', '#FF0000']
+
+  # Example colors
+    cmap = LinearSegmentedColormap.from_list('custom_cmap', color_list, N=len(color_list))
     x_range = np.arange(image.shape[1])
     y_range = np.arange(image.shape[0])
     xx, yy = np.meshgrid(x_range, y_range)
@@ -37,6 +47,7 @@ def generate_floorplan_contour(image, region, students):
     ax.set_title('Level 3')
     plt.savefig('Level3_final.png')
     plt.show()
+
 
 '''
 generate_floorplan_contour(image_path, region, student_occupacy)

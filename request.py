@@ -1,8 +1,42 @@
 from flask import Flask, render_template, request
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
 import plotly as pltly
 import pandas as pd
 import plotly.graph_objects as go
+import numpy as np
+import cv2
+import output1
+
+
+images_path = {'3': "floorplan_images/L_3.png",
+               '4':"floorplan_images/L_4.jpg",
+               '5': 'floorplan_images/L_5.jpg',
+               '6':"floorplan_images/L_6.jpg",
+               '6Chinese':"floorplan_images/L_6C.jpg"}
+
+greyscale_images = {'3': "floorplan_images/L3_grayscale_image.jpg",
+               '4':"floorplan_images/L4_grayscale_image.jpg",
+               '5': 'floorplan_images/L5_grayscale_image.jpg',
+               '6':"floorplan_images/L6_grayscale_image.jpg",
+               '6Chinese':"floorplan_images/L6C_grayscale_image.jpg"}
+
+regions_coordinates = {'3':{'Discussion.Cubicles':[[991,1311,120,178],[1036,1288,556,610]],
+                            'Soft.seats':[[469,855,153,289],[423,852,42,81],[4356,5467,192,330],[1077,1305,40,79],[1075,1305,694,727]],
+                            'Moveable.seats':[[1050,1287,250,502]]},
+                       '4':{'Soft.seats':[[1166,1639,682,1155],[2178,2656,1309,1721],[3228,3822,792,902],[4625,5098,1639,2530],[4537,5175,2799,2909]],
+                             'Sofa':[[1039,1749,1375,1584], [2909, 3987,1364,1606]]},
+                       '5':{'Windowed.Seats':[[36 ,1220,40,132],[40, 128,136,1308],[144,1224,1212,1304],[1644,4532,780,900],[1912,2668,2396,2528],[44,1912,2840,2960],[4720,5548,784,904],[5548,5688,784,2948],[4720,5548,2836,2948]],
+                             'X4.man.tables':[[288,1068,196,316],[1304,1568,368,736],[212,1004,2140,2260],[2156,2425,2134,2255],[1432,1704,2144,2264],[4108,4372,1045,1985]],
+                             'X8.man.tables':[[1992,3904,1024,1188],[1300,1828,2528,2700]]},
+                        '6':{'Diagonal.Seats':[[624,2007,348,492]],
+                             'Cubicle.seats':[[144,519,300,507], [1614,1986,675,1356]],
+                             'Windowed.Seats':[[150,2292,63,159],[2250,2355,267,1404] ,[1803,2283,1491,1587]]},
+                        '6Chinese':{'Diagonal.Seats':[[610,2342,918,1084]],
+                                    'Cubicle.seats':[[710,2644,1252,1340]],
+                                    'Windowed.Seats':[[208,300,756,1314],[630,2860,2022,2100],[2982,3074,1022,1992]]}}
+
 
 app = Flask(__name__, static_url_path='/', static_folder='templates')
 
@@ -22,13 +56,21 @@ def check_occupancy():
     week = request.form.get('week')
     day = int(request.form.get('day'))
 
-    # Check output of time, level and total occupancy
-    occupancy_rate = calculate_occupancy_rate(time,level)
+    #total occupancy for all floors
     total_occupancy = calculate_total_occupancy(df, level, time, week,day)
 
+    #occupancy by seat types by floor
+    form_seat_types_occupancy(df, level,time,week,day)
+
     # Three different graphs, comment out the ones you don't want
-    occupancy_by_time(level, time, week, day)
-    occupancy_by_level(time, week, day)
+    time_barplot = occupancy_by_time(level, time, week, day)
+    level_barplot = occupancy_by_level(time, week, day)
+
+    region = regions_coordinates[level]
+    students = form_seat_types_occupancy(df,level,time,week,day)
+    image_path = greyscale_images[level]
+    image = cv2.imread(image_path)
+    heatmap_floor = generate_floorplan_contour(image, region, students)
     
 
     return render_template('floor_view.html', result=occupancy_rate, time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
@@ -69,9 +111,15 @@ def floor_view(floor):
 
     return render_template('floor_view.html', floor=floor)
 
-def calculate_occupancy_rate(timing, level):
-    # Replace this with the occupancy rate calculation logic
-    return f'Occupancy rate for Level {level} at {timing} is not sure'   # Replace with actual data
+def form_seat_types_occupancy(df, level,time,week,day):
+    filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
+    seat_type = {}
+    for i in range(filtered_df.shape[0]):
+        seat = filtered_df.iloc[i]['seat_type']
+        number = filtered_df.iloc[i]['occupancy']
+        seat_type[seat] = number
+    return seat_type
+
 
 def calculate_total_occupancy(df,level,time,week,day):
     # Filter the DataFrame based on the parameters, replace for more filters
@@ -80,21 +128,7 @@ def calculate_total_occupancy(df,level,time,week,day):
     occupancy = filtered_df['occupancy'].sum()
     return occupancy
 
-def generate_visualization(occupancy_rate):
-    # Replace this with your visualization generation logic using Matplotlib or Plotly
-    # Example: generate a simple bar chart
 
-    levels = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5', 'Level 6']
-    occupancy_data = [60, 45, 75, 80, 70, 55]  # Replace with actual data
-
-    plt.bar(levels, occupancy_data)
-    plt.xlabel('Levels')
-    plt.ylabel('Occupancy Rate')
-    plt.title('Occupancy Rate by Level')
-    plt.savefig('static/occupancy_plot.png')  # Save the plot as a file
-    plt.close()
-
-    return 'occupancy_plot.png'  # Return the filename of the generated plot
 
 # Generate barplot of Occupancy over time for a specific week, day and level
 def occupancy_by_time(level, time, week, day):

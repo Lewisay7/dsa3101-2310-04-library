@@ -11,7 +11,7 @@ RUN apt update && apt install -y mysql-server mysql-client dos2unix openssh-clie
 COPY predDB.sh config.sh DSA3101-2310-04-lib.pem .
 
 # Convert line endings to Unix style
-RUN dos2unix /app/predDB.sh
+RUN dos2unix /app/predDB.sh /app/config.sh
 
 # Grant execute permissions to the script
 RUN chmod +x /app/predDB.sh

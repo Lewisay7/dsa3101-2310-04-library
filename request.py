@@ -1,23 +1,37 @@
 from flask import Flask, render_template, request
 import matplotlib.pyplot as plt
 import plotly as pltly
+import pandas as pd
+import plotly.graph_objects as go
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/', static_folder='templates')
+
+# Load dataset
+csv_file_path = 'datasets/model_output.csv'
+df = pd.read_csv(csv_file_path)
 
 @app.route('/')
 def index():
     return render_template('home.html')
 
+#Check occupancy button on home page and on floor_view page
 @app.route('/get_time_level', methods=['POST'])
 def check_occupancy():
-    timing = request.form.get('time')
+    time = int(request.form.get('time'))
     level = request.form.get('level')
-    
-    # Replace the following with the logic to fetch occupancy rate and generate visualizations
-    occupancy_rate = calculate_occupancy_rate(timing, level)
-    visualization = generate_visualization(occupancy_rate)
+    week = request.form.get('week')
+    day = int(request.form.get('day'))
 
-    return render_template('overall_view.html', result=occupancy_rate, visualization=visualization)
+    # Check output of time, level and total occupancy
+    occupancy_rate = calculate_occupancy_rate(time,level)
+    total_occupancy = calculate_total_occupancy(df, level, time, week,day)
+
+    # Three different graphs, comment out the ones you don't want
+    occupancy_by_time(level, time, week, day)
+    occupancy_by_level(time, week, day)
+    
+
+    return render_template('floor_view.html', result=occupancy_rate, time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
 
 @app.route('/overall_view')
 def overall_view():
@@ -57,7 +71,14 @@ def floor_view(floor):
 
 def calculate_occupancy_rate(timing, level):
     # Replace this with the occupancy rate calculation logic
-    return f'Occupancy rate for Level {level} at {timing} is 60%'  # Replace with actual data
+    return f'Occupancy rate for Level {level} at {timing} is not sure'   # Replace with actual data
+
+def calculate_total_occupancy(df,level,time,week,day):
+    # Filter the DataFrame based on the parameters, replace for more filters
+    filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
+    # Calculate the total occupancy for the filtered data
+    occupancy = filtered_df['occupancy'].sum()
+    return occupancy
 
 def generate_visualization(occupancy_rate):
     # Replace this with your visualization generation logic using Matplotlib or Plotly
@@ -74,6 +95,67 @@ def generate_visualization(occupancy_rate):
     plt.close()
 
     return 'occupancy_plot.png'  # Return the filename of the generated plot
+
+# Generate graph of Occupancy over time for a specific week, day and level
+def occupancy_by_time(level, time, week, day):
+    plot1y = []
+    plot1x = []
+    col = []
+
+    # Calculate occupancy across the day, add color red to current hour
+    for i in range(9,22):
+        filtered_df = df[(df['level'] == level) & (df['hour'] == i) & (df["week"] == week) &(df["day"] == day) ]
+        # Calculate the total occupancy for the filtered data
+        fil = filtered_df['occupancy'].sum()
+        plot1y.append(fil)
+        plot1x.append(i)
+        if i == time:
+            col.append("red")
+        else:
+            col.append("black")
+
+    # Plot graph
+    fig = go.Figure(data=go.Bar(x=plot1x, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=34),textfont_size=24))
+    # Add labels and title
+    fig.update_layout( xaxis_title="", yaxis_title=dict(text = 'Occupancy', font=dict(size=30)),plot_bgcolor='white')
+    new_tick_values = ["9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm", "9pm"]
+    fig.update_xaxes(type='category', tickmode='array', tickvals=plot1x, ticktext=new_tick_values,tickfont=dict(size=30))
+    fig.update_yaxes(tickfont=dict(size=20))
+    fig.update_traces(
+    textposition='outside',  
+    textfont=dict(size=24, color='black')
+    ,marker_color=col)
+
+    fig.show()
+
+# Generate a graph of Occupancy by Level
+def occupancy_by_level(time, week, day):
+    plot1y = []
+    plot1x = [3, 4, 5, 6, 7]
+    colors = ['#053F5C', '#429EBD', '#9FE7F5', '#F7AD19', '#F27F0C']
+
+    # Get Occupancy by level 
+    for i in range(3,8):
+        x = str(i)
+        if i == 7:
+            x = "6Chinese"
+        fil = calculate_total_occupancy(df, x, time, week,day)
+        plot1y.append(fil)
+
+    # Plot graph
+    fig = go.Figure(data=go.Bar(x=plot1x, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=34),textfont_size=24))
+    # Add labels and title
+    fig.update_layout( xaxis_title="", yaxis_title=dict(text = 'Occupancy', font=dict(size=30)),plot_bgcolor='white')
+    new_tick_values = ["Level 3", "Level 4", "Level 5", "Level 6", "Level 6 Chinese"]
+    fig.update_xaxes(type='category', tickmode='array', tickvals=plot1x, ticktext=new_tick_values,tickfont=dict(size=30))
+    fig.update_yaxes(tickfont=dict(size=20))
+    fig.update_traces(
+    textposition='outside',  
+    textfont=dict(size=24, color='black')
+    ,marker_color=colors)
+
+    fig.show()
+
 
 if __name__ == '__main__':
     app.run(debug=True)

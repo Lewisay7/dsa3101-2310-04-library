@@ -8,7 +8,64 @@
   <title>LibSpace</title>
   <script src="https://kit.fontawesome.com/53d0e98b35.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script>
+    function checkOccupancy() {
+    // Get the values from the timing input fields
+    const weekInput = document.getElementById("week").value;
+    const dayInput = document.getElementById("day").value;
+    const timeInput = document.getElementById("time").value;
+    const levelInput = document.getElementById("level").value;
+
+    // Check if any of the input fields are empty
+    if (weekInput === "" || dayInput === "" || timeInput === "" || levelInput === "") {
+        const warningMessage = document.getElementById("warningMessage");
+        warningMessage.classList.remove("hidden");
+    } else {
+        const warningMessage = document.getElementById("warningMessage");
+        warningMessage.classList.add("hidden");
+
+        // Create a form element
+        const form = document.createElement("form");
+
+        // Set the form's action and method attributes
+        form.action = "/get_time_level";
+        form.method = "POST";
+
+        // Create hidden input fields for each parameter
+        const weekInputField = document.createElement("input");
+        weekInputField.type = "hidden";
+        weekInputField.name = "week";
+        weekInputField.value = weekInput;
+        form.appendChild(weekInputField);
+
+        const dayInputField = document.createElement("input");
+        dayInputField.type = "hidden";
+        dayInputField.name = "day";
+        dayInputField.value = dayInput;
+        form.appendChild(dayInputField);
+
+        const timeInputField = document.createElement("input");
+        timeInputField.type = "hidden";
+        timeInputField.name = "time";
+        timeInputField.value = timeInput;
+        form.appendChild(timeInputField);
+
+        const levelInputField = document.createElement("input");
+        levelInputField.type = "hidden";
+        levelInputField.name = "level";
+        levelInputField.value = levelInput;
+        form.appendChild(levelInputField);
+
+        // Append the form to the document body (you can append it to a specific location if needed)
+        document.body.appendChild(form);
+
+        // Programmatically submit the form
+        form.submit();
+      }
+    }
+
+    </script>
 
 </head>
 
@@ -27,9 +84,7 @@
     <div class="intro">
       <h1>NUS LibSpace</h1>
       <p>Check your Occupancy here!</p>
-
-    <!-- <form action="/get_time_level" method="POST"> -->
-      <form action="/get_time_level" method="post">
+      <form action="/" method="post">
         <div class="timing-input">
           <select name="week" id="week">
             <option value="1">Week 1</option>
@@ -107,10 +162,7 @@
             <input type="submit" value="Upload and Convert">
         </form>
       </div>
-
     </div>
-
-
 
     <div class="about-clb" id="about-section">
       <div class="about-clb-text">
@@ -142,42 +194,6 @@
       </div>
     </div>
   </footer>
-
-
-
-
-  <script>
-    
-    function checkOccupancy() {
-      // Get the value from the timing input field
-      const timingInput = document.getElementById("time").value;
-      const levelInput = document.getElementById("level").value;
-      const weekInput = document.getElementById("week").value;
-      const dayInput = document.getElementById("day").value;
-  
-      // Check if the input is empty
-      if (timingInput === "" || levelInput === "") {
-        const warningMessage = document.getElementById("warningMessage");
-        warningMessage.classList.remove("hidden");
-      } else {
-        const warningMessage = document.getElementById("warningMessage");
-        warningMessage.classList.add("hidden");
-  
-        // Create a form element
-        const form = document.createElement("form");
-  
-        // Set the form's action and method attributes
-        form.action = "/get_time_level";
-        form.method = "POST";
-  
-        // Append the form to the document body (you can append it to a specific location if needed)
-        document.body.appendChild(form);
-  
-        // Programmatically submit the form
-        form.submit();
-      }
-    }
-  </script>
   
 </body>
 

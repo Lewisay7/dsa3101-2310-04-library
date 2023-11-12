@@ -38,7 +38,7 @@ regions_coordinates = {'3':{'Discussion.Cubicles':[[991,1311,120,178],[1036,1288
                                     'Windowed.Seats':[[208,300,756,1314],[630,2860,2022,2100],[2982,3074,1022,1992]]}}
 
 
-app = Flask(__name__, static_url_path='/', static_folder='templates')
+app = Flask(__name__, static_url_path='/static', static_folder='static')
 
 # Load dataset
 csv_file_path = 'datasets/model_output.csv'
@@ -51,32 +51,31 @@ def index():
 #Check occupancy button on home page and on floor_view page
 @app.route('/get_time_level', methods=['POST'])
 def check_occupancy():
-    time = int(request.form.get('time'))
-    level = request.form.get('level')
-    week = request.form.get('week')
-    day = int(request.form.get('day'))
+    if request.method == 'POST':
+        time = int(request.form.get('time'))
+        level = request.form.get('level')
+        week = request.form.get('week')
+        day = int(request.form.get('day'))
+        #total occupancy for all floors
+        total_occupancy = calculate_total_occupancy(df, level, time, week,day)
 
-    #total occupancy for all floors
-    total_occupancy = calculate_total_occupancy(df, level, time, week,day)
+        #occupancy by seat types by floor
+        form_seat_types_occupancy(df, level,time,week,day)
 
-    #occupancy by seat types by floor
-    form_seat_types_occupancy(df, level,time,week,day)
+        # Three different graphs, comment out the ones you don't want
+        occupancy_by_time(level, time, week, day)
+        occupancy_by_level(time, week, day)
+        occupancy_by_seat(level, time, week, day)
 
-    # Three different graphs, comment out the ones you don't want
-    occupancy_by_time(level, time, week, day)
-    occupancy_by_level(time, week, day)
-    occupancy_by_seat(level, time, week, day)
+        #heatmap plot
 
-    #heatmap plot
-
-    region = regions_coordinates[level]
-    students = form_seat_types_occupancy(df,level,time,week,day)
-    image_path = greyscale_images[level]
-    image = cv2.imread(image_path)
-    heatmap_floor = generate_floorplan_contour(image, region, students)
-    
-
-    return render_template('floor_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
+        region = regions_coordinates[level]
+        students = form_seat_types_occupancy(df,level,time,week,day)
+        image_path = greyscale_images[level]
+        image = cv2.imread(image_path)
+        heatmap_floor = generate_floorplan_contour(image, region, students)
+        return render_template('floor_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
+    return render_template('home.html')
 
 
 @app.route('/overall_view')
@@ -104,7 +103,7 @@ def overall_view():
         )
         circles.append(circle)
 
-    figure = plotly.Figure(data=circles)
+    figure = pltly.Figure(data=circles)
     circle_divs = [f.to_html(full_html=False) for f in figure.to_dict()["data"]]
 
     return render_template('overall_view.html', circle_divs=circle_divs)

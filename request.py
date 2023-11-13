@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
 import cv2
-from output1 import generate_floorplan_contour
+from heatmap import generate_floorplan_contour
 
 
 images_path = {'3': "floorplan_images/L3_grayscale_downsized.jpg",

@@ -9,6 +9,7 @@ import numpy as np
 import cv2
 from dash import Dash, dcc, html, Input, Output
 from heatmap import generate_floorplan_contour,compute_contour_data 
+import plotly.subplots as sp
 
 
 # Your existing Flask app
@@ -135,13 +136,15 @@ dash_app.layout = html.Div([
     dcc.Graph(id='occupancy-by-level'),
     dcc.Graph(id='occupancy-by-seat'),
     dcc.Graph(id='heatmap'),
+    dcc.Graph(id='occupancy-by-level-pie'),
 ])
 
 @dash_app.callback(
     [Output('occupancy-by-time', 'figure'),
      Output('occupancy-by-level', 'figure'),
      Output('occupancy-by-seat', 'figure'),
-     Output('heatmap', 'figure')],  # Add the heatmap output
+     Output('heatmap', 'figure'),
+     Output('occupancy-by-level-pie', 'figure')],  # Add the pie chart output
     [Input('level-dropdown', 'value'),
      Input('week-dropdown', 'value'),
      Input('hour-dropdown', 'value'),
@@ -151,11 +154,12 @@ def update_all_graphs(selected_level, selected_week, selected_hour, selected_day
     fig_time = occupancy_by_time(selected_level, selected_hour, selected_week, selected_day)
     fig_level = occupancy_by_level(selected_hour, selected_week, selected_day)
     fig_seat = occupancy_by_seat(selected_level, selected_hour, selected_week, selected_day)
-    
+    pie_chart = occupancy_by_level_pie(selected_hour,selected_week,selected_day)
+
     # Generate heatmap using the new function
     heatmap_fig = generate_heatmap(selected_level, selected_week, selected_hour, selected_day)
     
-    return fig_time, fig_level, fig_seat, heatmap_fig
+    return fig_time, fig_level, fig_seat, heatmap_fig, pie_chart
 
 @app.route('/')
 def index():
@@ -297,6 +301,47 @@ def generate_heatmap(level, week, hour, day):
     image_path = images_path[level]
     heatmap_fig = generate_floorplan_contour(image_path, region, students,level,seat_names,actual_seat_count)
     return heatmap_fig
+
+def occupancy_by_level_pie(time,week,day):
+    max = []
+    plot1y = []
+    label_list = []
+    subplot_titles =['Level 3','Level 4','Level 5','Level 6','Level 6 (Chinese']
+
+    max_seat = pd.read_csv('datasets/actual_seat_count.csv')
+    # Calculate the total occupancy for the filtered data
+    # Get Occupancy by level 
+    for i in range(3,8):
+        x = str(i)
+        if i == 7:
+            x = "6Chinese"
+        filtered_seat = max_seat[(df['level'] == x)]
+        occupancy = filtered_seat['count'].sum()
+        max.append(occupancy)
+        fil = calculate_total_occupancy(df, x, time, week,day)
+        non_occupied = occupancy-fil
+        occupied_vs_non = [fil,non_occupied]
+        plot1y.append(occupied_vs_non)
+        vslabels = ["Occupied", "Not Occupied"]
+        label_list.append(vslabels)
+
+
+    """labels_list = [['Category A', 'Category B', 'Category C'],
+               ['Category X', 'Category Y', 'Category Z']]
+    values_list = [[30, 50, 20], [40, 30, 30]]
+    subplot_titles = ['Pie Chart 1', 'Pie Chart 2']"""
+
+    fig = sp.make_subplots(rows=1, cols=len(label_list), subplot_titles=subplot_titles, specs=[[{'type':'domain'}]*len(label_list)])
+
+    # Add pie charts to subplots
+    for i, (labels, values) in enumerate(zip(label_list, plot1y), start=1):
+        fig.add_trace(go.Pie(labels=labels, values=values), 1, i)
+
+    # Update layout
+    fig.update_layout(title_text="Hihi")
+
+    return fig
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5050)

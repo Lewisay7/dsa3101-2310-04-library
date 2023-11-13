@@ -1,0 +1,10 @@
+flask
+pandas
+requests
+mysql-connector-python
+datetime
+os
+sshtunnel
+math
+matplotlib
+plotly

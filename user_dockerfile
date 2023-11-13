@@ -1,0 +1,26 @@
+from ubuntu 
+
+RUN apt update
+RUN apt install -y python3 python3-pip systemctl cron nano vim dos2unix
+RUN pip3 install --upgrade pip
+
+### TO DO: ###
+# 1. Create /app directory, 2. copy python script and 3. init.sh into /app
+## ADD YOUR INSTRUCTIONS BELOW ##
+RUN mkdir -p /app
+WORKDIR /app
+
+COPY upload.py upload.py
+COPY init.sh init.sh
+COPY sample_crontable.txt sample_crontable.txt
+COPY requirements.txt requirements.txt
+
+RUN pip3 install -r requirements.txt
+RUN chmod +x /app/init.sh
+RUN dos2unix /app/init.sh
+
+## INCLUDE THE FOLLOWING LINE IF YOU ARE USING sample_crontable.txt
+RUN dos2unix /app/sample_crontable.txt
+RUN crontab /app/sample_crontable.txt
+
+ENTRYPOINT ["/app/init.sh"]

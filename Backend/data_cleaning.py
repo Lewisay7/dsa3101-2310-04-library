@@ -13,7 +13,7 @@ def basic_cleaning(df: pd.DataFrame):
     df[['Date','Time']] = df.Datetime.str.split(" ", expand = True)
     df['Time'] = df['Time'].apply(lambda x: x.replace('+08:00','')) 
 
-    df.dropna(subset = ['User Number'], inplace = True)
+    df.dropna(subset = ['User Number','Broad Category'], inplace = True)
     df = df[-df['Broad Category'].isin(['Administrative Staff','Complimentary','Corporate Card',
                                         'External Members', 'External Members/Alumni', 'Non-Academic Staff',
                                         'Research Staff', 'Teaching Staff', 'Library Professional']) == True]

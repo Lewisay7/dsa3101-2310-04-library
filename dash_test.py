@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 import numpy as np
 import cv2
 from dash import Dash, dcc, html, Input, Output
+from heatmap import generate_floorplan_contour,compute_contour_data 
 
 
 # Your existing Flask app
@@ -133,12 +134,14 @@ dash_app.layout = html.Div([
     dcc.Graph(id='occupancy-by-time'),
     dcc.Graph(id='occupancy-by-level'),
     dcc.Graph(id='occupancy-by-seat'),
+    dcc.Graph(id='heatmap'),
 ])
 
 @dash_app.callback(
     [Output('occupancy-by-time', 'figure'),
      Output('occupancy-by-level', 'figure'),
-     Output('occupancy-by-seat', 'figure')],
+     Output('occupancy-by-seat', 'figure'),
+     Output('heatmap', 'figure')],  # Add the heatmap output
     [Input('level-dropdown', 'value'),
      Input('week-dropdown', 'value'),
      Input('hour-dropdown', 'value'),
@@ -149,7 +152,10 @@ def update_all_graphs(selected_level, selected_week, selected_hour, selected_day
     fig_level = occupancy_by_level(selected_hour, selected_week, selected_day)
     fig_seat = occupancy_by_seat(selected_level, selected_hour, selected_week, selected_day)
     
-    return fig_time, fig_level, fig_seat
+    # Generate heatmap using the new function
+    heatmap_fig = generate_heatmap(selected_level, selected_week, selected_hour, selected_day)
+    
+    return fig_time, fig_level, fig_seat, heatmap_fig
 
 @app.route('/')
 def index():
@@ -176,6 +182,14 @@ def calculate_total_occupancy(df,level,time,week,day):
     occupancy = filtered_df['occupancy'].sum()
     return occupancy
 
+def form_seat_types_occupancy(df, level,time,week,day):
+    filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
+    seat_type = {}
+    for i in range(filtered_df.shape[0]):
+        seat = filtered_df.iloc[i]['seat_type']
+        number = filtered_df.iloc[i]['occupancy']
+        seat_type[seat] = number
+    return seat_type
 
 # Generate barplot of Occupancy over time for a specific week, day and level
 def occupancy_by_time(level, time, week, day):
@@ -276,8 +290,13 @@ def occupancy_by_seat(level, time, week, day):
     ,marker_color=colors)
 
     return fig
-
-
+#generate heatmap
+def generate_heatmap(level, week, hour, day):
+    region = regions_coordinates[level]
+    students = form_seat_types_occupancy(df, level, hour, week, day)
+    image_path = images_path[level]
+    heatmap_fig = generate_floorplan_contour(image_path, region, students,level)
+    return heatmap_fig
 
 if __name__ == '__main__':
     app.run(debug=True, port=5050)

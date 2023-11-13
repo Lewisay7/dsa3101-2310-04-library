@@ -36,13 +36,19 @@ seat_types = {'3':['Disccusion.Cubicles','Soft.seats','Moveable.Seats'],
               '6':['Diagonal.Seats','Cubicle.seats','Windowed.Seats'],
               '6Chinese':['Diagonal.Seats','Cubicle.seats','Windowed.Seats']}
 
-def compute_contour_data(seat_type, coordinates_list, students, contour_data):
+def compute_contour_data(seat_type, coordinates_list, students, contour_data, text_data):
     for x1, x2, y1, y2 in coordinates_list:
         student_count = students.get(seat_type, 0)
         # Update the corresponding region in the contour data
         contour_data[y1:y2 + 1, x1:x2 + 1] = student_count
+        # Update the text data for hover information
+        occupancy_rate = round((student_count/(actual_seat_count[level][seat_type]))*100,2)
+        seat = seat_names[seat_type]
+        #inverting y coordinates
+        inverted_y1, inverted_y2 = contour_data.shape[0] - y2 - 1, contour_data.shape[0] - y1 - 1
+        text_data[inverted_y1:inverted_y2 + 1, x1:x2 + 1] = f"Seat Type: {seat}<br>Student Count: {student_count}<br>Occupancy Rate: {occupancy_rate}%"
 
-def generate_floorplan_contour(image_path, region, students):
+def generate_floorplan_contour(image_path, region, students,level):
     # Load the floorplan image and convert to data URI
     with open(image_path, "rb") as image_file:
         encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
@@ -55,19 +61,18 @@ def generate_floorplan_contour(image_path, region, students):
     y_range = np.arange(image.shape[0])
     xx, yy = np.meshgrid(x_range, y_range)
 
-    # Create an array for contour data
+    # Create arrays for contour data and text data
     contour_data = np.zeros_like(xx, dtype=np.float32)
+    text_data = np.empty_like(xx, dtype=object)
 
-    # Parallelize the computation of contour_data
+    # Parallelize the computation of contour_data and text_data
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(compute_contour_data, seat_type, coordinates_list, students, contour_data)
+        futures = [executor.submit(compute_contour_data, seat_type, coordinates_list, students, contour_data, text_data)
                    for seat_type, coordinates_list in region.items()]
         concurrent.futures.wait(futures)
 
     # Apply Gaussian blur to the contour data with a smaller kernel
-    contour_data = cv2.blur(contour_data, (60, 60), cv2.BORDER_DEFAULT)
-    print(contour_data.shape)
-    print(image.shape)
+    contour_data = cv2.blur(contour_data, (33, 33), cv2.BORDER_DEFAULT)
 
     # Invert the y-axis data
     contour_data = np.flipud(contour_data)
@@ -76,9 +81,8 @@ def generate_floorplan_contour(image_path, region, students):
     fig = go.Figure()
 
     # Add filled contour plot using the custom colormap
-    fig.add_trace(go.Heatmap(z=contour_data, colorscale=color_list, showscale=False, zmin=0, zmax=max(students.values()), opacity=0.7,
-                             hoverinfo="text+name", text=[[f"Seat Type: {seat_type}<br>Student Count: {students[seat_type]}" 
-                                                           for seat_type in region.keys()] for row in contour_data]))
+    heatmap_trace = go.Heatmap(z=contour_data, colorscale=color_list, showscale=True, zmin=0, zmax=max(students.values()), opacity=0.8,
+                               hoverinfo="text", text=text_data)
 
     # Add floorplan image as background
     fig.add_layout_image(
@@ -94,23 +98,36 @@ def generate_floorplan_contour(image_path, region, students):
         layer="below"  # Set the layer to "below" to place it under the plot
     )
 
-    # Customize layout
+    # Add colorbar trace below the plot
+    colorbar_trace = go.Heatmap(z=[[0, max(students.values())]], colorscale=color_list, showscale=False, zmin=0, zmax=max(students.values()),
+                                hoverinfo="skip", colorbar=dict(
+                                    orientation="h",
+                                    title='Student Count',
+                                    tickvals=np.linspace(0, max(students.values()), len(color_list)).tolist(),
+                                    ticktext=np.linspace(0, max(students.values()), len(color_list)).astype(int).tolist(),
+                                ))
+
+    # Update layout
     fig.update_layout(
         width=image.shape[1],
         height=image.shape[0],
-        title_text=f'Level {level}',
         xaxis=dict(visible=False),
         yaxis=dict(visible=False),
         coloraxis_colorbar=dict(
-            title='Student Count',
             tickvals=np.linspace(0, max(students.values()), len(color_list)).tolist(),
             ticktext=np.linspace(0, max(students.values()), len(color_list)).astype(int).tolist(),
         ),
-        template='plotly_white'
+        template='plotly_white',
     )
 
+    # Add traces to the figure
+    fig.add_trace(heatmap_trace)
+    fig.add_trace(colorbar_trace)
+
     # Save the plot to an HTML file
-    fig.write_html(f'Level{level}.html')
+    return fig
+
+
 
 # Example usage
 
@@ -121,4 +138,4 @@ def generate_floorplan_contour(image_path, region, students):
 # region = regions_coordinates[level]
 # image_path = images_path[level]
 # students = form_seat_types_occupancy(df, level,time,week,day)
-#generate_floorplan_contour(image_path, regions_coordinates[level], students)
+#generate_floorplan_contour(image_path, regions_coordinates[level], students,level)

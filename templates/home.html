@@ -103,10 +103,13 @@
       <div class="fileupload">
         <h1>Upload a CSV or Excel file:</h1>
         <form action="/upload" method="POST" enctype="multipart/form-data">
-            <input type="file" name="file" accept=".csv, .xls, .xlsx">
+            <input type="file" name="file" id="file-input" accept=".csv, .xls, .xlsx">
+            <button type="button" id="remove-file">Remove File</button>
             <input type="submit" value="Upload and Convert">
+            
         </form>
-      </div>
+    </div>
+    
 
     </div>
 
@@ -177,6 +180,11 @@
         form.submit();
       }
     }
+
+  document.getElementById('remove-file').addEventListener('click', function () {
+        document.getElementById('file-input').value = '';
+    });
+
   </script>
   
 </body>

@@ -10,14 +10,23 @@ import cv2
 from dash import Dash, dcc, html, Input, Output
 
 
-app = Dash(__name__)
-server = app.server
+# Your existing Flask app
+app = Flask(__name__, static_url_path='/', static_folder='templates')
 
 # Load dataset
 csv_file_path = 'datasets/model_output.csv'
 df = pd.read_csv(csv_file_path)
 
-app.layout = html.Div([
+# Create a Dash app
+dash_app = Dash(__name__, server=app, url_base_pathname='/dashboard/')
+#app = Dash(__name__)
+#server = app.server
+
+# Load dataset
+csv_file_path = 'datasets/model_output.csv'
+df = pd.read_csv(csv_file_path)
+
+dash_app.layout = html.Div([
     dcc.Dropdown(
         id='level-dropdown',
         options=[
@@ -84,7 +93,7 @@ app.layout = html.Div([
     dcc.Graph(id='occupancy-by-seat'),
 ])
 
-@app.callback(
+@dash_app.callback(
     [Output('occupancy-by-time', 'figure'),
      Output('occupancy-by-level', 'figure'),
      Output('occupancy-by-seat', 'figure')],
@@ -100,7 +109,22 @@ def update_all_graphs(selected_level, selected_week, selected_hour, selected_day
     
     return fig_time, fig_level, fig_seat
 
+@app.route('/')
+def index():
+    return render_template('home.html')
 
+#Check occupancy button on home page and on floor_view page
+@app.route('/get_time_level', methods=['POST'])
+def check_occupancy():
+    time = int(request.form.get('time'))
+    level = request.form.get('level')
+    week = request.form.get('week')
+    day = int(request.form.get('day'))
+
+    #total occupancy for all floors
+    total_occupancy = calculate_total_occupancy(df, level, time, week,day)
+
+    return render_template('floor_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
 
 
 def calculate_total_occupancy(df,level,time,week,day):
@@ -212,6 +236,6 @@ def occupancy_by_seat(level, time, week, day):
     return fig
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=5050)
+    app.run(debug=True, port=5050)
 
 

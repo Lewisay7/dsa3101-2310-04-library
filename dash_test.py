@@ -32,7 +32,7 @@ images_path = {'3': "floorplan_images/L3_grayscale_downsized.jpg",
                '4':"floorplan_images/L4_grayscale_downsized.jpg",
                '5': 'floorplan_images/L5_grayscale_downsized.jpg',
                '6':"floorplan_images/L6_grayscale_downsized.jpg",
-               '6Chinese':"floorplan_images/L6C_grayscale_image.jpg"}
+               '6Chinese':"floorplan_images/L6C_grayscale_downsized.jpg"}
 
 actual_seat_count = {'3':{'Discussion.Cubicles':56,
                             'Soft.seats':132,
@@ -45,7 +45,7 @@ actual_seat_count = {'3':{'Discussion.Cubicles':56,
                         '6Chinese':{'Diagonal.Seats':72,
                              'Cubicle.seats':52,
                              'Windowed.Seats':36},
-                        '6C':{'Diagonal.Seats':92,
+                        '6':{'Diagonal.Seats':92,
                                     'Cubicle.seats':155,
                                     'Windowed.Seats':136}}
 
@@ -295,7 +295,7 @@ def generate_heatmap(level, week, hour, day):
     region = regions_coordinates[level]
     students = form_seat_types_occupancy(df, level, hour, week, day)
     image_path = images_path[level]
-    heatmap_fig = generate_floorplan_contour(image_path, region, students,level)
+    heatmap_fig = generate_floorplan_contour(image_path, region, students,level,seat_names,actual_seat_count)
     return heatmap_fig
 
 if __name__ == '__main__':

@@ -14,7 +14,7 @@ images_path = {'3': "floorplan_images/L3_grayscale_downsized.jpg",
                '4':"floorplan_images/L4_grayscale_downsized.jpg",
                '5': 'floorplan_images/L5_grayscale_downsized.jpg',
                '6':"floorplan_images/L6_grayscale_downsized.jpg",
-               '6Chinese':"floorplan_images/L6C_grayscale_image.jpg"}
+               '6Chinese':"floorplan_images/L6C_grayscale_downsized.jpg"}
 
 regions_coordinates = {'3':{'Discussion.Cubicles':[[1137,1409,509,566],[1088,1439,114,168]],
                             'Soft.seats':[[467,933,41,66],[521,929,143,266],[1184,1431,632,662],[1185,1431,41,72]],
@@ -35,8 +35,25 @@ seat_types = {'3':['Disccusion.Cubicles','Soft.seats','Moveable.Seats'],
               '5':['Windowed.Seats','X4.man.tables','X8.man.tables'],
               '6':['Diagonal.Seats','Cubicle.seats','Windowed.Seats'],
               '6Chinese':['Diagonal.Seats','Cubicle.seats','Windowed.Seats']}
+actual_seat_count = {'3':{'Discussion.Cubicles':56,
+                            'Soft.seats':132,
+                            'Moveable.seats':156},
+                       '4':{'Soft.seats':268,
+                             'Sofa':32},
+                       '5':{'Windowed.Seats':97,
+                             'X4.man.tables':220,
+                             'X8.man.tables':160},
+                        '6Chinese':{'Diagonal.Seats':72,
+                             'Cubicle.seats':52,
+                             'Windowed.Seats':36},
+                        '6C':{'Diagonal.Seats':92,
+                                    'Cubicle.seats':155,
+                                    'Windowed.Seats':136}}
 
-def compute_contour_data(seat_type, coordinates_list, students, contour_data, text_data):
+seat_names = {"Discussion.Cubicles": "Discussion Cubicles", "Soft.seats" : "Soft Seats", "Moveable.seats": "Moveable Seats",
+                  "Sofa":"Sofa","Windowed.Seats":"Windowed Seats","X4.man.tables":"4 Man Tables","X8.man.tables":"8 Man Tables",
+                  "Diagonal.Seats": "Diagonal Seats","Cubicle.seats":"Cubicle Seats"}
+def compute_contour_data(seat_type, coordinates_list, students, contour_data, text_data,level,seat_names,actual_seat_count):
     for x1, x2, y1, y2 in coordinates_list:
         student_count = students.get(seat_type, 0)
         # Update the corresponding region in the contour data
@@ -48,7 +65,7 @@ def compute_contour_data(seat_type, coordinates_list, students, contour_data, te
         inverted_y1, inverted_y2 = contour_data.shape[0] - y2 - 1, contour_data.shape[0] - y1 - 1
         text_data[inverted_y1:inverted_y2 + 1, x1:x2 + 1] = f"Seat Type: {seat}<br>Student Count: {student_count}<br>Occupancy Rate: {occupancy_rate}%"
 
-def generate_floorplan_contour(image_path, region, students,level):
+def generate_floorplan_contour(image_path, region, students,level,seat_names,actual_seat_count):
     # Load the floorplan image and convert to data URI
     with open(image_path, "rb") as image_file:
         encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
@@ -67,7 +84,7 @@ def generate_floorplan_contour(image_path, region, students,level):
 
     # Parallelize the computation of contour_data and text_data
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(compute_contour_data, seat_type, coordinates_list, students, contour_data, text_data)
+        futures = [executor.submit(compute_contour_data, seat_type, coordinates_list, students, contour_data, text_data,level,seat_names,actual_seat_count)
                    for seat_type, coordinates_list in region.items()]
         concurrent.futures.wait(futures)
 

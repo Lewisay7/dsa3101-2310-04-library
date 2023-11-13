@@ -84,36 +84,21 @@ app.layout = html.Div([
     dcc.Graph(id='occupancy-by-seat'),
 ])
 
-# Callbacks to update the graphs based on user input
 @app.callback(
-    Output('occupancy-by-time', 'figure'),
+    [Output('occupancy-by-time', 'figure'),
+     Output('occupancy-by-level', 'figure'),
+     Output('occupancy-by-seat', 'figure')],
     [Input('level-dropdown', 'value'),
      Input('week-dropdown', 'value'),
      Input('hour-dropdown', 'value'),
      Input('day-dropdown', 'value')]
 )
-def update_time_graph(selected_level, selected_week, selected_hour, selected_day):
-    return occupancy_by_time(selected_level,selected_hour,selected_week,selected_day)
-
-@app.callback(
-    Output('occupancy-by-level', 'figure'),
-    [Input('level-dropdown', 'value'),
-     Input('week-dropdown', 'value'),
-     Input('hour-dropdown', 'value'),
-     Input('day-dropdown', 'value')]
-)
-def update_level_graph(selected_level, selected_week, selected_hour, selected_day):
-    return occupancy_by_level(selected_hour,selected_week,selected_day)
-
-@app.callback(
-    Output('occupancy-by-seat', 'figure'),
-    [Input('level-dropdown', 'value'),
-     Input('week-dropdown', 'value'),
-     Input('hour-dropdown', 'value'),
-     Input('day-dropdown', 'value')]
-)
-def update_seat_graph(selected_level, selected_week, selected_hour, selected_day):
-    return occupancy_by_seat(selected_level,selected_hour,selected_week,selected_day)
+def update_all_graphs(selected_level, selected_week, selected_hour, selected_day):
+    fig_time = occupancy_by_time(selected_level, selected_hour, selected_week, selected_day)
+    fig_level = occupancy_by_level(selected_hour, selected_week, selected_day)
+    fig_seat = occupancy_by_seat(selected_level, selected_hour, selected_week, selected_day)
+    
+    return fig_time, fig_level, fig_seat
 
 
 

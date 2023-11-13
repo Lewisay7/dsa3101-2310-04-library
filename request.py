@@ -30,17 +30,34 @@ regions_coordinates = {'3':{'Discussion.Cubicles':[[1137,1409,509,566],[1088,143
                         '6Chinese':{'Diagonal.Seats':[[281,372,285,339],[464,555,285,339],[638,729,285,339],[819,909,285,339],[992,1082,285,339]],
                                     'Cubicle.seats':[[324,1217,390,419]],
                                     'Windowed.Seats':[[96,138,239,407],[1377,1422,320,620],[291,1296,632,659]]}}
-seat_types = {'3':['Disccusion.Cubicles','Soft.seats','Moveable.Seats'],
-              '4':['Soft.seats','Sofa'],
-              '5':['Windowed.Seats','X4.man.tables','X8.man.tables'],
-              '6':['Diagonal.Seats','Cubicle.seats','Windowed.Seats'],
-              '6Chinese':['Diagonal.Seats','Cubicle.seats','Windowed.Seats']}
 
+actual_seat_count = {'3':{'Discussion.Cubicles':56,
+                            'Soft.seats':132,
+                            'Moveable.seats':156},
+                       '4':{'Soft.seats':268,
+                             'Sofa':32},
+                       '5':{'Windowed.Seats':97,
+                             'X4.man.tables':220,
+                             'X8.man.tables':160},
+                        '6Chinese':{'Diagonal.Seats':72,
+                             'Cubicle.seats':52,
+                             'Windowed.Seats':36},
+                        '6C':{'Diagonal.Seats':92,
+                                    'Cubicle.seats':155,
+                                    'Windowed.Seats':136}}
+
+#nicer seat names
+seat_names = {"Discussion.Cubicles": "Discussion Cubicles", "Soft.seats" : "Soft Seats", "Moveable.seats": "Moveable Seats",
+                  "Sofa":"Sofa","Windowed.Seats":"Windowed Seats","X4.man.tables":"4 Man Tables","X8.man.tables":"8 Man Tables",
+                  "Diagonal.Seats": "Diagonal Seats","Cubicle.seats":"Cubicle Seats"}
+    
 app = Flask(__name__, static_url_path='/', static_folder='templates')
 
 # Load dataset
 csv_file_path = 'datasets/model_output.csv'
+actual_seat_path = 'datasets/actual_seat_count.csv'
 df = pd.read_csv(csv_file_path)
+seat_df = pd.read_csv(actual_seat_path)
 
 @app.route('/')
 def index():

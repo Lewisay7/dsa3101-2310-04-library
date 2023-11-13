@@ -42,7 +42,7 @@ def compute_contour_data(seat_type, coordinates_list, students, contour_data):
         # Update the corresponding region in the contour data
         contour_data[y1:y2 + 1, x1:x2 + 1] = student_count
 
-def generate_floorplan_contour_plotly(image_path, region, students):
+def generate_floorplan_contour(image_path, region, students):
     # Load the floorplan image and convert to data URI
     with open(image_path, "rb") as image_file:
         encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
@@ -121,4 +121,4 @@ def generate_floorplan_contour_plotly(image_path, region, students):
 # region = regions_coordinates[level]
 # image_path = images_path[level]
 # students = form_seat_types_occupancy(df, level,time,week,day)
-#generate_floorplan_contour_plotly(image_path, regions_coordinates[level], students)
+#generate_floorplan_contour(image_path, regions_coordinates[level], students)

@@ -10,33 +10,31 @@ import cv2
 from output1 import generate_floorplan_contour
 
 
-images_path = {'3': "floorplan_images/L_3.png",
-               '4':"floorplan_images/L_4.jpg",
-               '5': 'floorplan_images/L_5.jpg',
-               '6':"floorplan_images/L_6.jpg",
-               '6Chinese':"floorplan_images/L_6C.jpg"}
-
-greyscale_images = {'3': "floorplan_images/L3_grayscale_image.jpg",
-               '4':"floorplan_images/L4_grayscale_image.jpg",
-               '5': 'floorplan_images/L5_grayscale_image.jpg',
-               '6':"floorplan_images/L6_grayscale_image.jpg",
+images_path = {'3': "floorplan_images/L3_grayscale_downsized.jpg",
+               '4':"floorplan_images/L4_grayscale_downsized.jpg",
+               '5': 'floorplan_images/L5_grayscale_downsized.jpg',
+               '6':"floorplan_images/L6_grayscale_downsized.jpg",
                '6Chinese':"floorplan_images/L6C_grayscale_image.jpg"}
 
-regions_coordinates = {'3':{'Discussion.Cubicles':[[991,1311,120,178],[1036,1288,556,610]],
-                            'Soft.seats':[[469,855,153,289],[423,852,42,81],[4356,5467,192,330],[1077,1305,40,79],[1075,1305,694,727]],
-                            'Moveable.seats':[[1050,1287,250,502]]},
-                       '4':{'Soft.seats':[[1166,1639,682,1155],[2178,2656,1309,1721],[3228,3822,792,902],[4625,5098,1639,2530],[4537,5175,2799,2909]],
-                             'Sofa':[[1039,1749,1375,1584], [2909, 3987,1364,1606]]},
-                       '5':{'Windowed.Seats':[[36 ,1220,40,132],[40, 128,136,1308],[144,1224,1212,1304],[1644,4532,780,900],[1912,2668,2396,2528],[44,1912,2840,2960],[4720,5548,784,904],[5548,5688,784,2948],[4720,5548,2836,2948]],
-                             'X4.man.tables':[[288,1068,196,316],[1304,1568,368,736],[212,1004,2140,2260],[2156,2425,2134,2255],[1432,1704,2144,2264],[4108,4372,1045,1985]],
-                             'X8.man.tables':[[1992,3904,1024,1188],[1300,1828,2528,2700]]},
-                        '6':{'Diagonal.Seats':[[624,2007,348,492]],
-                             'Cubicle.seats':[[144,519,300,507], [1614,1986,675,1356]],
-                             'Windowed.Seats':[[150,2292,63,159],[2250,2355,267,1404] ,[1803,2283,1491,1587]]},
-                        '6Chinese':{'Diagonal.Seats':[[610,2342,918,1084]],
-                                    'Cubicle.seats':[[710,2644,1252,1340]],
-                                    'Windowed.Seats':[[208,300,756,1314],[630,2860,2022,2100],[2982,3074,1022,1992]]}}
-
+regions_coordinates = {'3':{'Discussion.Cubicles':[[1137,1409,509,566],[1088,1439,114,168]],
+                            'Soft.seats':[[467,933,41,66],[521,929,143,266],[1184,1431,632,662],[1185,1431,41,72]],
+                            'Moveable.seats':[[1149,1406,233,464]]},
+                       '4':{'Soft.seats':[[309,429,149,252],[579,698,268,378],[855,1004,171,200],[1224,1340,363,557],[1190,1353,623,636]],
+                             'Sofa':[[278,462,300,350], [768, 1052,299,348]]},
+                       '5':{'Windowed.Seats':[[12 ,323,9,29],[9,36,29,287],[38,323,264,285],[432,1194,171,197],[11,506,620,648],[507,701,525,549],[1244,1464,620,645],[1464,1499,198,623],[1242,1499,171,194]],
+                             'X4.man.tables':[[80,281,42,71],[59,266,468,497],[344,413,80,158],[380,449,471,495],[569,638,470,495],[1182,1152,228,435]],
+                             'X8.man.tables':[[528,1029,224,260],[348,482,557,580]]},
+                        '6':{'Diagonal.Seats':[[390,485,147,209],[590,687,147,209],[786,882,147,209],[971,1067,147,209],[1155,1250,147,209]],
+                             'Cubicle.seats':[[92,327,129,216], [387,1229,93,122],[1007,1239,288,578]],
+                             'Windowed.Seats':[[95,1427,27,68],[1403,1467,114,599] ,[1124,1425,635,678]]},
+                        '6Chinese':{'Diagonal.Seats':[[281,372,285,339],[464,555,285,339],[638,729,285,339],[819,909,285,339],[992,1082,285,339]],
+                                    'Cubicle.seats':[[324,1217,390,419]],
+                                    'Windowed.Seats':[[96,138,239,407],[1377,1422,320,620],[291,1296,632,659]]}}
+seat_types = {'3':['Disccusion.Cubicles','Soft.seats','Moveable.Seats'],
+              '4':['Soft.seats','Sofa'],
+              '5':['Windowed.Seats','X4.man.tables','X8.man.tables'],
+              '6':['Diagonal.Seats','Cubicle.seats','Windowed.Seats'],
+              '6Chinese':['Diagonal.Seats','Cubicle.seats','Windowed.Seats']}
 
 app = Flask(__name__, static_url_path='/', static_folder='templates')
 
@@ -69,9 +67,9 @@ def check_occupancy():
 
     # region = regions_coordinates[level]
     # students = form_seat_types_occupancy(df,level,time,week,day)
-    # image_path = greyscale_images[level]
+    # image_path = images_path[level]
     # image = cv2.imread(image_path)
-    # heatmap_floor = generate_floorplan_contour(image, region, students)
+    # heatmap_floor = generate_floorplan_contour(image_path, region, students)
     
 
     return render_template('floor_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
@@ -102,7 +100,7 @@ def overall_view():
         )
         circles.append(circle)
 
-    figure = plotly.Figure(data=circles)
+    figure = pltly.Figure(data=circles)
     circle_divs = [f.to_html(full_html=False) for f in figure.to_dict()["data"]]
 
     return render_template('overall_view.html', circle_divs=circle_divs)

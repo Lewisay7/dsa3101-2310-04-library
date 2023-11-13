@@ -29,6 +29,11 @@ csv_file_path = 'datasets/model_output.csv'
 df = pd.read_csv(csv_file_path)
 
 ## predefined inputs
+"""time_dict = {'label': f'{i}am' if i < 12 else f'{i-12}pm' if i > 12 else '12pm', 'value': i} for i in range(9, 22)
+time_mapping = {i: f"{i % 12 or 12} {'AM' if i < 12 else 'PM'}" for i in range(1, 25)}
+print(time_mapping.get(4))
+print(time_mapping.get(12))
+print(time_mapping.get(24))"""
 images_path = {'3': "floorplan_images/L3_grayscale_downsized.jpg",
                '4':"floorplan_images/L4_grayscale_downsized.jpg",
                '5': 'floorplan_images/L5_grayscale_downsized.jpg',
@@ -181,11 +186,10 @@ def check_occupancy():
 #Check overall button on home page
 @app.route('/get_time_overall', methods=['POST'])
 def overall():
-    level = request.form.get('level')
+    level = "overall"
     week = request.form.get('week')
     time = int(request.form.get('time'))
     day = int(request.form.get('day'))
-
 
     occupancy_by_time(level, time, week, day)
     occupancy_by_level(time, week, day)
@@ -197,10 +201,15 @@ def overall():
 
 
 def calculate_total_occupancy(df,level,time,week,day):
+    if level == "overall":
+        filtered_df = df[(df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
+        occupancy = filtered_df['occupancy'].sum()
+        return occupancy
     # Filter the DataFrame based on the parameters, replace for more filters
     filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
     # Calculate the total occupancy for the filtered data
     occupancy = filtered_df['occupancy'].sum()
+
     return occupancy
 
 def form_seat_types_occupancy(df, level,time,week,day):
@@ -220,7 +229,10 @@ def occupancy_by_time(level, time, week, day):
 
     # Calculate occupancy across the day, add color red to current hour
     for i in range(9,22):
-        filtered_df = df[(df['level'] == level) & (df['hour'] == i) & (df["week"] == week) &(df["day"] == day) ]
+        if level == "overall":
+            filtered_df = df[(df['hour'] == i) & (df["week"] == week) &(df["day"] == day) ]
+        else:
+            filtered_df = df[(df['level'] == level) & (df['hour'] == i) & (df["week"] == week) &(df["day"] == day) ]
         # Calculate the total occupancy for the filtered data
         fil = filtered_df['occupancy'].sum()
         plot1y.append(fil)
@@ -278,10 +290,13 @@ def occupancy_by_level(time, week, day):
 def occupancy_by_seat(level, time, week, day):
     plot1y = []
     x_names= []
-    colors = ['#053F5C', '#429EBD', '#9FE7F5', '#F7AD19', '#F27F0C']
+    colors = ['#053F5C', '#429EBD', '#9FE7F5', '#F7AD19', '#F27F0C','#053F5C', '#429EBD', '#9FE7F5', '#F7AD19', '#F27F0C']
 
     #Find seat types for current level
-    list1 = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
+    if level == "overall":
+        list1 = df[(df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
+    else:
+        list1 = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
     seat_filter = pd.Series(list1["seat_type"]).drop_duplicates().tolist()
     print(seat_filter)
     print
@@ -323,7 +338,6 @@ def generate_heatmap(level, week, hour, day):
     return heatmap_fig
 
 def occupancy_by_level_pie(time,week,day):
-    max = []
     plot1y = []
     label_list = []
     subplot_titles =['Level 3','Level 4','Level 5','Level 6','Level 6 (Chinese']
@@ -337,7 +351,6 @@ def occupancy_by_level_pie(time,week,day):
             x = "6Chinese"
         filtered_seat = max_seat[(df['level'] == x)]
         occupancy = filtered_seat['count'].sum()
-        max.append(occupancy)
         fil = calculate_total_occupancy(df, x, time, week,day)
         non_occupied = occupancy-fil
         occupied_vs_non = [fil,non_occupied]

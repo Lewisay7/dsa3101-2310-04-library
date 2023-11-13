@@ -63,9 +63,9 @@ def check_occupancy():
     form_seat_types_occupancy(df, level,time,week,day)
 
     # Three different graphs, comment out the ones you don't want
-    occupancy_by_time(level, time, week, day)
-    occupancy_by_level(time, week, day)
-    occupancy_by_seat(level, time, week, day)
+    # occupancy_by_time(level, time, week, day)
+    # occupancy_by_level(time, week, day)
+    # occupancy_by_seat(level, time, week, day)
 
     # region = regions_coordinates[level]
     # students = form_seat_types_occupancy(df,level,time,week,day)

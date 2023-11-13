@@ -80,7 +80,7 @@ dash_app.layout = html.Div([
             {'label': 'Level 6', 'value': '6'},
             {'label': 'Level 6 (Chinese)', 'value': '6Chinese'}
         ],
-        value='3',
+        value="3",
         multi=False,
         style={'width': '50%'}
     ),
@@ -104,7 +104,7 @@ dash_app.layout = html.Div([
             {'label': 'Reading Week', 'value': 'Reading'},
             {'label': 'Recess week', 'value': 'Recess'}
         ],
-        value='1',
+        value="1",
         multi=False,
         style={'width': '50%'}
     ),
@@ -168,15 +168,32 @@ def index():
 #Check occupancy button on home page and on floor_view page
 @app.route('/get_time_level', methods=['POST'])
 def check_occupancy():
-    time = int(request.form.get('time'))
     level = request.form.get('level')
     week = request.form.get('week')
+    time = int(request.form.get('time'))
     day = int(request.form.get('day'))
 
     #total occupancy for all floors
     total_occupancy = calculate_total_occupancy(df, level, time, week,day)
 
     return render_template('floor_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
+
+#Check overall button on home page
+@app.route('/get_time_overall', methods=['POST'])
+def overall():
+    level = request.form.get('level')
+    week = request.form.get('week')
+    time = int(request.form.get('time'))
+    day = int(request.form.get('day'))
+
+
+    occupancy_by_time(level, time, week, day)
+    occupancy_by_level(time, week, day)
+    occupancy_by_seat(level, time, week, day)
+    #total occupancy for all floors
+    total_occupancy = calculate_total_occupancy(df, level, time, week,day)
+
+    return render_template('overall_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
 
 
 def calculate_total_occupancy(df,level,time,week,day):
@@ -225,6 +242,7 @@ def occupancy_by_time(level, time, week, day):
     textfont=dict(size=24, color='black')
     ,marker_color=col)
 
+    fig.write_html("templates/occupancy_by_time.html")
     return fig
 
 # Generate a barplot of Occupancy by Level
@@ -253,6 +271,7 @@ def occupancy_by_level(time, week, day):
     textfont=dict(size=24, color='black')
     ,marker_color=colors)
 
+    fig.write_html("templates/occupancy_by_level.html")
     return fig
 
 # Generate a barplot of Occupancy by seats at a specific level
@@ -293,6 +312,7 @@ def occupancy_by_seat(level, time, week, day):
     textfont=dict(size=24, color='black')
     ,marker_color=colors)
 
+    fig.write_html("templates/occupancy_by_seat.html")
     return fig
 #generate heatmap
 def generate_heatmap(level, week, hour, day):

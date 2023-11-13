@@ -34,7 +34,7 @@ body {
     justify-content: space-around;
     align-items: center;
     background-color: #ffffff;
-    padding-left: 50px;
+    margin-right: 20px;
   }
 
   .nav-items a {
@@ -48,53 +48,26 @@ body {
     flex-direction: column;
     justify-content: center;
     text-align: center;
-    height: 800px;
+    /* height: 2000px; */
     /* background: url("https://img.freepik.com/premium-vector/gradient-modern-design-abstract-background-color_103282-920.jpg"); */
     background : linear-gradient(to bottom, rgba(185, 175, 175, 0.1) 0%, rgba(243, 223, 223, 0.3) 100%), url("https://img.freepik.com/premium-vector/gradient-modern-design-abstract-background-color_103282-920.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    padding : 0px;
   }
 
-  .intro h1 {
-    font-family: sans-serif;
-    font-size: 90px;
-    color: #053F5C;
-    font-weight: bold;
-    text-transform:uppercase;
-    margin: 0;
-  }
-
-  .intro p {
-    font-family: sans-serif;
-    font-size: 30px;
-    color: #429ebd;
-    text-transform: none;
-    margin: 20px 0;
-  }
-
-  /*.intro button {
-    background-color: #5edaf0;
-    color: #000;
-    padding: 10px 25px;
-    border: none;
-    border-radius: 5px;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.4)
-  }
-
-  /* CSS for timing input */
   .timing-input {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 20px 0;
+      margin: 0px 0;
+      padding-top: 50px;
+      padding-bottom: 50px ;
   }
 
   .timing-input input {
-      padding: 10px;
+      padding: 1000px;
       font-size: 16px;
       margin: 0 10px;
       border: 1px solid #ccc;
@@ -127,87 +100,6 @@ body {
   font-family: sans-serif;
   font-size: 16px;
 }
-  /* Style the file upload container */
-.fileupload {
-  display: inline-block;
-  flex-direction: column;
-  background-color: #f4f4f4;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-  height: 10vh; 
-  width: 23%; 
-  text-align: center;
-  margin: 0px 20px;
-  
-  }
-  
-  .fileupload h1 {
-  font-size: 20px;
-  color: #333333;
-  margin: 0;
-  text-transform: uppercase;
-  }
-  
-  /* Style the file input and submit button */
-  .fileupload input[type="file"] {
-  margin: 0;
-  font-size: 15px;
-  padding: 10px;
-  border: 2px solid #ccc;
-  border-radius: 5px;
-  outline: none;
-  background: #ffffff; /* White background */
-  color: #000;
-  }
-  
-  .fileupload input[type="submit"] {
-  background-color: #5edaf0;
-  color: #000;
-  padding: 10px 25px;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.4);
-  }
-  
-  /* Style the submit button on hover */
-  .fileupload input[type="submit"]:hover {
-  background-color: #2676b7;
-  }
-  
-
-  .about-clb {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: auto;
-    padding: 40px 80px;
-    border-top: 2px solid #eeeeee;
-  }
-
-  .about-clb img {
-    width: 500px;
-    max-width: 100%;
-    height: auto;
-    border-radius: 10px;
-  }
-
-  .about-clb-text h2 {
-    font-size: 40px;
-    color: #333333;
-    text-transform: uppercase;
-    margin: 10px ;
-  }
-
-  .about-clb-text p {
-    font-size: 16px;
-    color: #585858;
-    margin: 10px ;
-    padding: 5px 20px 0px 0px;
-  }
 
   /* CSS for footer */
   .footer {
@@ -299,84 +191,97 @@ form#level input[type="submit"]:hover {
   background-color: #2676b7;
 }
 
-/* Style the file upload container */
-.fileupload {
-display: flex;
-flex-direction: column;
-padding: 5px;
-background-color: #f4f4f4;
-border: 2px solid #e0e0e0;
-border-radius: 10px;
-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-height: 10vh; 
-width: 23%; 
-text-align: center;
-
-}
-
-.fileupload h1 {
-font-size: 20px;
-color: #333333;
-margin: 0;
-text-transform: none
-}
-
-/* Style the file input and submit button */
-.fileupload input[type="file"] {
-margin: 0;
-font-size: 15px;
-padding: 10px;
-border: 2px solid #ccc;
-border-radius: 5px;
-outline: none;
-background: #ffffff; /* White background */
-color: #000;
-}
-
-.fileupload input[type="submit"] {
-background-color: #5edaf0;
-color: #000;
-padding: 10px 25px;
-border: none;
-border-radius: 5px;
-font-size: 16px;
-font-weight: bold;
-cursor: pointer;
-box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.4);
-}
-
-/* Style the submit button on hover */
-.fileupload input[type="submit"]:hover {
-background-color: #2676b7;
-}
-
 /*styling for total number of students at floor_view html*/
 
-.occupancy_result{
+.occupancy_result p{
   margin: 0;
-  color : #2676b7;
-
+  color:#053F5C;
+  font-size: 40px;
 }
 
 .number {
   color: rgb(244, 22, 22);
+  font-size: 45px;
   
 }
 
 /*heatmaps plots*/
 .heatmaps {
-  display: flex;
-  flex-wrap: wrap;
-}
-.row {
-  width: 100%;
-  display: flex;
-}
-.col {
-  flex: 1;
-  margin: 10px;
-  size: 30px;
-}
-.col img{
- width: 400px;
-}
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 20px; /* Added margin to separate from the form */
+  }
+  
+  .row {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap; /* Allow images to wrap to the next line */
+  }
+  
+  .col {
+    flex: 1;
+    margin: 10px;
+    text-align: center; /* Center the images within the columns */
+    position: relative; /* Position relative for absolute positioning of span */
+  }
+  
+  .col img {
+    max-width: 100%; /* Ensure images don't exceed the width of their container */
+    width: 400px;
+    height: auto; /* Maintain aspect ratio */
+    padding: 30px;
+  }
+  
+  .col span {
+    position: absolute;
+    top: -10px; /* Position the span at the top of the container */
+    left: 50%; /* Center the span horizontally */
+    transform: translateX(-50%); /* Center the span precisely */
+    font-size: 25px; /* Adjust font size as needed */
+    color: #fff; /* Set text color */
+    background-color: #404d82; /* Add a semi-transparent background for better readability */
+    padding: 5px; /* Add padding for better visual appearance */
+    white-space: nowrap; /* Prevent text from wrapping */
+    margin-top: 0;
+    border-radius: 5px;
+  }
+
+  .barplot {
+    width: 800px; /* Set a fixed width for the container */
+    margin: 0 auto; /* Center the container horizontally */
+    display: flex;
+    flex-wrap: wrap; /* Allow images to wrap to the next line */
+    align-items: center;
+    position: relative; /* Position relative for absolute positioning of span */
+  }
+  
+  .barplot img {
+    max-width: 100%; /* Ensure images don't exceed the width of their container */
+    width: 100%;
+    height: auto; /* Maintain aspect ratio */
+    padding: 20px;
+  }
+  
+  .barplot span {
+    position: absolute;
+    top: -20px; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    font-size: 25px; 
+    color: #ffffff; 
+    background-color:  #404d82; 
+    padding: 5px; 
+    white-space: nowrap; 
+    margin-top: 0;
+    border-radius: 5px;
+  }
+  
+  @media (max-width: 768px) {
+    .col img {
+        width: 200px;
+      }
+    
+    .barplot {
+    width: 500px; /* Set a fixed width for the container */
+    }
+  }

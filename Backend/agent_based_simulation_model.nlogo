@@ -1,165 +1,219 @@
-extensions [csv table py]
+extensions [csv table py time]
 
+; Define a breed of agents called "students"
 breed [students student]
 
-
+; Global variables to keep track of the current time, number of students, data, counter, and weeks
 globals [
-  ; current-time  ; Variable to keep track of the current time (in hours)
-  number-of-students ;
+  current-time  ; Variable to keep track of the current time (in hours)
   data ;
-  counter;
-  weeks;
 ]
 
-
+; Patches own variables to represent the floor number and max-occupancy of the patch
 patches-own [
   floor-number  ; The floor number of the patch
   max-occupancy ; max-occupancy for that floor
 ]
 
+; Students own variables representing their initial behavior, preferred floor, time, and current behavior
 students-own [
-  behavior  ; Behavior of the student (e.g., studying, chope)
+  initial-behavior  ; Behavior of the student (e.g., studying, chope)
   preferred-floor  ; Preferred floor to study
+  time             ; Time attribute for student
+  current-behavior ; Current behavior of the student
 ]
 
+; Initial setup procedure
 to setup
   clear-all
+  ; Setup Python extension and import necessary libraries
   py:setup py:python
   py:run "import pandas as pd"
   py:run "import numpy"
   py:run "import math"
-  setup-data
-  make-weeks-table
-  setup-floors
-  set-default-shape students "person"
-  ;setup-entrances
-  ;set current-time hour    ; Initialize current time to 0 (library opens)
-  create-student
 
+  ; Set week, day, and initialize data
+  py:set "week" week
+  py:set "day" day
+  setup-data
+  setup-time-hour
+  setup-floors
+
+  ; Set default shape for students to "person"
+  set-default-shape students "person"
+
+  ; Initialize ticks
   reset-ticks
 end
 
-to make-weeks-table
-  set weeks table:make
-  table:put weeks "1" "2"
-  table:put weeks "2" "3"
-  table:put weeks "3" "4"
-  table:put weeks "4" "5"
-  table:put weeks "5" "6"
-  table:put weeks "6" "Recess"
-  table:put weeks "Recess" "7"
-  table:put weeks "7" "8"
-  table:put weeks "8" "9"
-  table:put weeks "9" "10"
-  table:put weeks "10" "11"
-  table:put weeks "11" "12"
-  table:put weeks "12" "13"
-  table:put weeks "13" "Reading"
-  table:put weeks "Reading" "Exam"
-  table:put weeks "Exam" "1"
-end
-
-
+; Procedure to set up data, reading from a CSV file
 to setup-data
-  py:run "data =pd.read_csv('datasets/model_output.csv')"
-
+  py:run "data =pd.read_csv('datasets/clean_df.csv',index_col=False)"
+  py:run "data['Datetime'] = pd.to_datetime(data['Datetime'])"
+  py:run "data['Date'] = pd.to_datetime(data['Date'])"
+  py:run "data = data.sort_values(by = ['Datetime'])"
+  py:run "data['Time'] = data['Datetime'].dt.time"
+  py:run "level_survey = pd.read_csv('datasets/floor.csv')"
 end
 
+; Procedure to set up time based on the week
+to setup-time-hour
+  ; Depending on the week, set the data for the current day
+  if week = "Normal" [
+    set data py:runresult "(data[(data['Datetime'].dt.month == 1) & (data['Datetime'].dt.dayofweek == 2)]).astype(str).values.tolist() if data[(data['Datetime'].dt.month == 1) & (data['Datetime'].dt.dayofweek == day - 1)].empty else (data[(data['Datetime'].dt.month == 1) & (data['Datetime'].dt.dayofweek == day - 1)]).astype(str).values.tolist()"
+  ]
+  if week = "Recess" [
+    set data py:runresult "(data[(data['Datetime'].dt.month == 2) & (data['Datetime'].dt.dayofweek == 2)]).astype(str).values.tolist() if data[(data['Datetime'].dt.month == 2) & (data['Datetime'].dt.dayofweek == day - 1)].empty else (data[(data['Datetime'].dt.month == 2) & (data['Datetime'].dt.dayofweek == day - 1)]).astype(str).values.tolist()"
+  ]
+  if week = "Reading" [
+    set data py:runresult "(data[(data['Datetime'].dt.month == 4) & (data['Datetime'].dt.dayofweek == 2) & (data['Datetime'].dt.day <= 21)]).astype(str).values.tolist() if data[(data['Datetime'].dt.month == 4) & (data['Datetime'].dt.dayofweek == day - 1) & (data['Datetime'].dt.day <= 21)].empty else (data[(data['Datetime'].dt.month == 4) & (data['Datetime'].dt.dayofweek == day - 1) & (data['Datetime'].dt.day <= 21)]).astype(str).values.tolist()"
+  ]
+  if week = "Exam" [
+    set data py:runresult "(data[(data['Datetime'].dt.month == 4) & (data['Datetime'].dt.dayofweek == 2) & (data['Datetime'].dt.day > 21)]).astype(str).values.tolist() if data[(data['Datetime'].dt.month == 4) & (data['Datetime'].dt.dayofweek == day - 1) & (data['Datetime'].dt.day > 21)].empty else (data[(data['Datetime'].dt.month == 4) & (data['Datetime'].dt.dayofweek == day - 1) & (data['Datetime'].dt.day > 21)]).astype(str).values.tolist()"
+  ]
+end
+
+; Main simulation loop
 to go
-  update-time
-  create-student
-  ;update-occupancy
+  ; Handle entry or exit events based on the current tick
+  handle-entry-or-exit-event
+  ; Increment the tick
   tick
 end
 
-to create-student
-  clear-turtles
-  py:set "week" week
-  py:set "day" day
-  py:set "hour" hour
-  let levels ["3" "4" "5" "6" "6Chinese"]
-  foreach levels [ level ->
-    py:set "level" level
-    set number-of-students py:runresult " 0 if data.loc[(data['week'] == week) & (data['day'] == day) & (data['hour'] == hour) & (data['level'] == level)].empty else data.loc[(data['week'] == week) & (data['day'] == day) & (data['hour'] == hour) & (data['level'] == level)]['occupancy'].values[0]"
-    create-students number-of-students [
-      set preferred-floor level
-      ifelse random-float 1 < chope-seat
-      [set behavior "chope-seats"
-      set shape "x"]
-      [set behavior "studying"]
-    move-to one-of patches with [floor-number = [preferred-floor] of myself]
+; Procedure to handle entry or exit events based on the current tick
+to handle-entry-or-exit-event
+  ; Use "carefully" to handle potential runtime errors
+  carefully [
+    ; Get the row corresponding to the current tick from the data
+    let row item ticks data
+    ; Check if it's an entry event and generate students accordingly
+    ifelse item 1 row = "Entry" [
+      generate-entry-student
+    ] [
+      ; If it's not an entry event, generate an exit event
+      generate-exit-student
+    ]
+    ; Set the current time based on the time in the data row
+    set current-time time:create item 2 row
+  ] [
+    ; If an error occurs, stop the simulation
+    stop
+  ]
+end
+
+; Procedure to generate an entry student
+to generate-entry-student
+  ; Define levels for studying and discussion
+  let study-levels ["3" "4" "5" "6" "6Chinese"]
+  let discussion-levels ["3" "4"]
+  ; Count the number of students with "chope" behavior
+  let choped-seats count students with [current-behavior = "chope"]
+  ; Generate a random probability
+  let prob random-float 1
+  ; Check if there are choped seats and choped students exist
+  let choped-student-exists any? students with [current-behavior = "chope" and time:is-after? (current-time)  (time:plus time 30 "minutes")]
+  ; If there are choped seats and choped students exist
+  ifelse choped-seats != 0 and choped-student-exists [
+    ; Ask one of the choped students to change behavior and reset appearance
+    ask one-of students with [current-behavior = "chope" and time:is-after? (current-time)  (time:plus time 30.0 "minutes")] [
+      set current-behavior initial-behavior
+      set shape "person"
+      set time current-time
+    ]
+  ] [
+    ; If there are no choped seats or choped students, create a new student
+    create-students 1 [
+      set time current-time
+      ; Generate a random probability
+      let probability random-float 1
+      ; Assign initial behavior based on probability
+      if probability < study [
+        set initial-behavior "study"
+        set current-behavior "study"
+      ]
+      if probability >= study [
+        set initial-behavior "discussion"
+        set current-behavior "discussion"
+      ]
+      ; Set preferred floor based on current behavior
+      if current-behavior = "study" [
+        let pf one-of study-levels
+        set preferred-floor pf
+      ]
+      if current-behavior = "discussion" [
+        let pf one-of discussion-levels
+        set preferred-floor pf
+      ]
+      ; Move the student to a patch on the preferred floor
+      move-to one-of patches with [floor-number = [preferred-floor] of myself]
     ]
   ]
 end
 
+; Procedure to generate an exit student
+to generate-exit-student
+  ; Generate a random probability
+  let probability random-float 1
+  ; Check if there are students in the simulation
+  if count students > 0 [
+    ; If probability is less than or equal to the chope-seat probability
+    ifelse probability <= chope-seat [
+      ; Ask one of the students without "chope" behavior to chope a seat
+      ask one-of students with [current-behavior !=  "chope"] [
+        set current-behavior "chope"
+        set shape "x"
+        set time current-time
+      ]
+    ] [
+      ; If probability is greater than chope-seat, ask one of the students to exit
+      ask one-of students with [current-behavior != "chope"] [
+        die
+      ]
+    ]
+  ]
+end
+
+; Procedure to draw floors with specific attributes
 to draw-floor [x y w l c f o]
   ask patches with
   [w + x > pxcor and pxcor >= x
-  and
-   pycor >= y and (y + l)> pycor ]
-   [set pcolor c set floor-number f set max-occupancy o]
+    and
+    pycor >= y and (y + l)> pycor ]
+  [set pcolor c set floor-number f set max-occupancy o]
 end
 
-
+; Procedure to set up floors with specific attributes
 to setup-floors
   ; Create patches for each floor and assign a floor number and max-occupancy
   draw-floor 1 2 24 24 white "3" 344
-  draw-floor 1 34 24 24 white "4" 300
-  draw-floor 33 2 24 24 white "5" 477
-  draw-floor 33 34 24 24 white "6" 383
-  draw-floor 65 21 18 18 white "6Chinese" 160
-end
-
-to update-time
-  ; Increment the current time by one hour (one tick)
-  let day-increased false
-  let week-increased false
-  ifelse hour + 1 > 24
-  [set hour 1
-    set day-increased true]
-  [set hour hour + 1]
-  if day-increased
-  [ifelse day + 1 > 7
-    [set day 1
-      set week-increased true]
-    [set day day + 1]
-  ]
-  if week-increased
-  [set week table:get weeks week]
-
- ; new week
-
-  ;set week ;do something here
-
-
-end
-
-
-to-report is-full [f]
-
+  draw-floor 1 28 24 24 white "4" 300
+  draw-floor 28 2 24 24 white "5" 477
+  draw-floor 28 28 24 24 white "6" 383
+  draw-floor 55 18 15 15 white "6Chinese" 160
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-224
-10
-1415
-812
+366
+109
+1084
+658
 -1
 -1
-13.0
+10.0
 1
-10
+15
 1
 1
-1
-0
-0
-0
 1
 0
-90
 0
-60
+0
+1
+0
+70
+0
+53
 1
 1
 1
@@ -167,10 +221,10 @@ ticks
 30.0
 
 BUTTON
-6
-224
-69
-257
+34
+234
+97
+267
 setup
 setup
 NIL
@@ -184,10 +238,10 @@ NIL
 1
 
 BUTTON
-81
-223
-144
-256
+109
+233
+172
+266
 go
 go
 NIL
@@ -201,117 +255,106 @@ NIL
 1
 
 SLIDER
-5
-395
-177
-428
+28
+87
+200
+120
 share-table
 share-table
 0
 1
-0.44
+0.09
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-5
-435
-177
-468
+24
+142
+196
+175
 chope-seat
 chope-seat
 0
 1
-0.02
+0.1
 0.01
 1
 NIL
 HORIZONTAL
 
 MONITOR
-5
-503
-157
-548
+30
+505
+182
+550
 6Chinese occupancy rate
-(count students with [preferred-floor = \"6Chinese\" and behavior = \"studying\"]/ 160)
+precision (count students with [preferred-floor = \"6Chinese\" and current-behavior != \"chope\"]/ 160) 3
 17
 1
 11
 
 MONITOR
-5
-553
-114
-598
+29
+391
+138
+436
 5 occupancy rate
-count students with [preferred-floor = \"5\"] / 400
+precision (count students with [preferred-floor = \"5\"] / 400) 3
 17
 1
 11
 
 CHOOSER
-0
+24
 10
-156
+180
 55
 week
 week
-"1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "Exam" "Reading" "Recess"
-1
+"Normal" "Exam" "Reading" "Recess"
+0
 
 CHOOSER
-0
-55
-138
-100
+201
+11
+339
+56
 day
 day
 1 2 3 4 5 6 7
-1
-
-INPUTBOX
-0
-99
-124
-159
-hour
-17.0
-1
-0
-Number
+2
 
 MONITOR
-11
-614
-115
-659
+202
+319
+306
+364
 total_occupancy
-count students
+count students with [current-behavior != \"chope\"]
 17
 1
 11
 
 MONITOR
-18
-671
-104
-716
-current_hour
-hour
+210
+445
+301
+490
+current_time
+time:show current-time \"HH:mm\"
 17
 1
 11
 
 BUTTON
-158
-224
-221
-257
-NIL
-go
+199
+232
+302
+265
+go until close
+go\ncarefully\n[let row item ticks data]\n[stop]
 T
 1
 T
@@ -320,15 +363,81 @@ NIL
 NIL
 NIL
 NIL
-1
+0
+
+PLOT
+45
+565
+325
+805
+occupancy
+time
+number-of-students
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count students with [current-behavior != \"chope\"]"
 
 MONITOR
-23
-737
-104
-782
-current_day
-day
+207
+383
+301
+428
+chopped seats
+count students with [current-behavior = \"chope\"]
+17
+1
+11
+
+SLIDER
+29
+186
+201
+219
+study
+study
+0
+1
+0.87
+0.01
+1
+NIL
+HORIZONTAL
+
+MONITOR
+29
+443
+139
+488
+6 occupancy rate
+precision (count students with [preferred-floor = \"6\" and current-behavior != \"chope\"]/ 383) 3
+17
+1
+11
+
+MONITOR
+29
+285
+138
+330
+3 occupancy rate
+precision (count students with [preferred-floor = \"3\" and current-behavior != \"chope\"]/ 344) 3
+17
+1
+11
+
+MONITOR
+31
+338
+140
+383
+4 occupancy rate
+precision (count students with [preferred-floor = \"4\" and current-behavior != \"chope\"]/ 300) 3
 17
 1
 11
@@ -336,36 +445,35 @@ day
 @#$#@#$#@
 ## WHAT IS IT?
 
-(a general understanding of what the model is trying to show or explain)
-This model tries to model out behaviours of students in occupying a space in the Central Library, each square box represents a level, starting from the bottom left to the right (3,4,5,6,6Chinese)
+This model simulates the behaviors of students in occupying space within the Central Library. Each square box represents a library level, starting from the bottom left to the right (3, 4, 5, 6, 6Chinese).
 
 ## HOW IT WORKS
 
-(what rules the agents use to create the overall behavior of the model)
-each tick represents an hour, make sure to change the tick speed if you are pressing go (infinity)
+Each tick in the model represents as minutes (sometimes hours), providing a temporal representation of student behaviors. Note that tick speed adjustments may be necessary while running the simulation.
 
 ## HOW TO USE IT
 
-(how to use the model, including a description of each of the items in the Interface tab)
+The model is designed to capture the dynamics of student behavior in the library. Adjust the parameters in the Interface tab to observe how different factors influence occupancy patterns. Key elements include entry and exit events, floor preferences, and student behaviors such as studying, discussions, and seat chope.
 
 ## THINGS TO NOTICE
 
-(suggested things for the user to notice while running the model)
+Observe how the occupancy on each library level changes over time. Pay attention to patterns during peak hours and explore how different factors impact the overall occupancy.
 
 ## THINGS TO TRY
 
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
-
+1. Adjust the tick speed to observe hourly changes more closely.
+2. Experiment with the probability of students chope-ing seats.
+3. Explore the impact of different entry and exit patterns on overall library occupancy.
 
 ## EXTENDING THE MODEL
 
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
-can try to model out the gates congestion during different times (early morning, lunchtime, closing hours) and see how fast/efficient the gates are?
-properly code out the functions (tendency to share table, chope seats, ??)
+1. Model out congestion at entry gates during different times of the day.
+2. Implement more nuanced behaviors, such as the tendency to share tables.
+3. Explore additional factors influencing student behaviors for a more accurate representation.
 
 ## NETLOGO FEATURES
 
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
+The model utilizes NetLogo's time-based simulation features, including the use of ticks to represent hourly changes in the simulation.
 
 ## RELATED MODELS
 

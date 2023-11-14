@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LibSpace</title>
     <script src="https://kit.fontawesome.com/53d0e98b35.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="floor.css">
 </head>
 
 <body>
@@ -89,33 +90,38 @@
           </div>
         </form>
         <div class = "occupancy_result">
-          <p>Total Number of Students on Week {{ week }}, {{ day }} Day, {{ time }} {{ list }}time level {{ level }} is 
+          <p>Total Number of Students on Week {{ week }}, {{ day }} day, {{ time }}hour  is 
             <br>
-            <span class="number">{{ total_occupancy }}</span>
+            <span class = "number">{{ total_occupancy }} </span>
           </p>
         </div>
         <div class="heatmaps">
           <div class="row">
-              <div class="col"><img src="/mock_heatmap/Level_3.png" alt="Plot 1"></div>
-              <div class="col"><img src="/mock_heatmap/Level_4.png" alt="Plot 2"></div>
-              <div class="col"><img src="" alt="/mock_heatmap/Level_5.png"></div>
+              <!-- <div class="col"><img src="/mock_heatmap/Level_3.png" alt="Level 3"><span>Level 3 :</span></div>
+              <!-- <div class="col"><img src="/mock_heatmap/Level_4.png" alt="Level 4"><span>Level 4 : 178</span></div>
+              <div class="col"><img src="/mock_heatmap/Level_5.png" alt="Level 5"><span>Level 5 : 117</span></div> --> 
           </div>
           <div class="row">
-              <div class="col"><img src="/mock_heatmap/Level_6.png" alt="Plot 4"></div>
-              <div class="col"><img src="" alt="/mock_heatmap/Level_6C.png"></div>
-        </div>
+              <!-- <div class="col"><img src="/mock_heatmap/seats.png" alt="Level 6"><span>Seats Breakdown</span></div>
+              <div class="col"><img src="/mock_heatmap/timetrend.png" alt="Level 6 C"><span>Time Trend</span></div> -->
+          </div>
+          <div class="row">
+            <iframe src="http://localhost:5050/dashboard" width="100%" height="1000px" style="border: none;"></iframe>
+            <!--iframe src="occupancy_by_time.html" width="100%" height="600px" frameborder="0"></iframe>
+            <iframe src="occupancy_by_level.html" width="100%" height="600px" frameborder="0"></iframe>
+            <iframe src="occupancy_by_seat.html" width="100%" height="600px" frameborder="0"></iframe -->
+          </div>
+          <div class="barplot">
+            <!-- <img src="/mock_heatmap/barplot.png" alt="Level 6"><span>Overall Breakdown</span> -->
+          </div>
+          <div id="tester" style="width:90%;height:250px;">
+          </div>
+        </div> 
+  
       </div>
-        <!-- <p>{{ result }}</p>
-        <p>Week: {{ week }}</p>
-        <p>Day: {{ day }}</p>
-        <p>Time: {{ time }}</p>
-        <p>Level: {{ level }}</p>
-        <p>Total Occupancy filtered by Time and Level = {{ total_occupancy }}</p> -->
-        <div>{{ plot1 }}</div>
     </main>
   
     <footer class="footer">
-      <img src="data:image/png;base64, {{ plot }}" alt="Contour Plot">
         <div class="copy">&copy; NUSLibSpace</div>
         <div class="bottom-links">
           <div class="links">
@@ -126,11 +132,14 @@
           </div>
           <div class="links">
             <span>Social Links</span>
-            <a href="#"><i class="fab fa-facebook"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="https://instagram.com/deeheidrated?igshid=djl3YXY0Y3Zxbjh3"><i class="fab fa-facebook"></i></a>
+            <a href="https://instagram.com/augusthineee?igshid=bjF5OGFqMnMydDB1"><i class="fab fa-twitter"></i></a>
+            <a href="https://instagram.com/ygeneeee?igshid=cTM1emZjZ3I4MTdw"><i class="fab fa-instagram"></i></a>
           </div>
         </div>
       </footer>
+
+      <script>
+      </script>
 </body>
 </html>

@@ -329,7 +329,8 @@ def rate_by_level(time, week, day):
         xaxis_title=dict(text='Occupancy Rate', font=dict(size=30)),
         autosize = True,
         margin=dict(l=0, r=0, t=0 , b=0),
-        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+        paper_bgcolor='rgba(0,0,0,0)', 
+        plot_bgcolor='rgba(0,0,0,0)'
     )
     new_tick_values = ["Level 3", "Level 4", "Level 5", "Level 6", "Level 6 C"]
     fig.update_yaxes(type='category', tickmode='array', tickvals=plot1x, ticktext=new_tick_values,

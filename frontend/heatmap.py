@@ -76,7 +76,7 @@ def generate_floorplan_contour_html(image_path, region, students,level,seat_name
         encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
         data_uri = f"data:image/png;base64,{encoded_image}"
 
-    color_list = ['#00FFFF', '#00FF00', '#7FFF00', '#FFFF00', '#FFA500', '#FF6347', '#FF4500', '#FF0000']
+    color_list = ['rgba(0,0,0,0)', '#00FF00', '#7FFF00', '#FFFF00', '#FFA500', '#FF6347', '#FF4500', '#FF0000']
     # Load the floorplan image for other processing
     image = cv2.imread(image_path)
     x_range = np.arange(image.shape[1])

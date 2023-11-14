@@ -207,18 +207,22 @@ form#level input[type="submit"]:hover {
 
 /* Widget styles */
 .widget-row {
+  justify-content: center;
+  align-items: center; /* Center horizontally */
   display: flex;
-  gap: 100px;
+  gap: 20px;
   height : 400px;
+  padding : 0 5px;
 }
 
 .widget {
+    justify-content: center;
+    align-items: center; /* Center horizontally */
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 10px;
     flex: 1;
-    margin-right: 5px;
 }
 
 .bar-plot {
@@ -230,7 +234,7 @@ form#level input[type="submit"]:hover {
 #totalOccupancyWidget{
     margin: 0;
     font-size: 30px;
-    color: red;
+    color: #302f49;
     flex: 1;
 }
 

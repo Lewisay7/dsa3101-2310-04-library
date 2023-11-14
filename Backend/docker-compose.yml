@@ -18,7 +18,8 @@ services:
     volumes:
       - ./datasets:/app/datasets/
     depends_on:
-      - clean
+      clean:
+        condition: service_completed_successfully
   predict:
     build:
       context: .
@@ -30,7 +31,8 @@ services:
     volumes:
       - ./datasets:/app/datasets/
     depends_on:
-      - db_data
+      db_data:
+        condition: service_completed_successfully
   db_prediction:
     build: 
       context: .
@@ -40,4 +42,5 @@ services:
     volumes:
       - ./datasets:/app/datasets/
     depends_on:
-      - predict
+      predict:
+        condition: service_completed_successfully

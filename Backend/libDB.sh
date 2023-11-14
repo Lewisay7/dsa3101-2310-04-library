@@ -7,7 +7,7 @@ TABLE='LibraryRecords'
 # File to import
 FILE_PATH='./datasets/clean_df.csv'
 
-# Start the SSH tunnel <ssh -o StrictHostKeyChecking=no -i $SSH_KEY_PATH -N -L $PORT:$HOST:3306 $SSH_USER@$SSH_HOST &>
+# Start the SSH tunnel
 ssh -4 -o StrictHostKeyChecking=no -i $SSH_KEY_PATH -N -L $PORT:$HOST:3306 $SSH_USER@$SSH_HOST &
 SSH_PID=$!
 

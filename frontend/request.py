@@ -1,20 +1,21 @@
 from flask import Flask, render_template, request
-from matplotlib.colors import LinearSegmentedColormap
-from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
 import plotly as pltly
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.ticker import MaxNLocator
 import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
 import cv2
-from heatmap import generate_floorplan_contour
+from heatmap import *
+import plotly.subplots as sp
 
 
 images_path = {'3': "floorplan_images/L3_grayscale_downsized.jpg",
                '4':"floorplan_images/L4_grayscale_downsized.jpg",
                '5': 'floorplan_images/L5_grayscale_downsized.jpg',
                '6':"floorplan_images/L6_grayscale_downsized.jpg",
-               '6Chinese':"floorplan_images/L6C_grayscale_image.jpg"}
+               '6Chinese':"floorplan_images/L6C_grayscale_downsized.jpg"}
 
 regions_coordinates = {'3':{'Discussion.Cubicles':[[1137,1409,509,566],[1088,1439,114,168]],
                             'Soft.seats':[[467,933,41,66],[521,929,143,266],[1184,1431,632,662],[1185,1431,41,72]],
@@ -54,8 +55,8 @@ seat_names = {"Discussion.Cubicles": "Discussion Cubicles", "Soft.seats" : "Soft
 app = Flask(__name__, static_url_path='/', static_folder='templates')
 
 # Load dataset
-csv_file_path = 'datasets/model_output.csv'
-actual_seat_path = 'datasets/actual_seat_count.csv'
+csv_file_path = '../datasets/model_output.csv'
+actual_seat_path = '../datasets/actual_seat_count.csv'
 df = pd.read_csv(csv_file_path)
 seat_df = pd.read_csv(actual_seat_path)
 
@@ -64,69 +65,65 @@ def index():
     return render_template('home.html')
 
 #Check occupancy button on home page and on floor_view page
-@app.route('/get_time_level', methods=['POST'])
-def check_occupancy():
-    time = int(request.form.get('time'))
-    level = request.form.get('level')
+# @app.route('/get_time_level', methods=['POST'])
+# def check_occupancy():
+#     time = int(request.form.get('time'))
+#     level = request.form.get('level')
+#     week = request.form.get('week')
+#     day = int(request.form.get('day'))
+
+#     #total occupancy for all floors
+#     total_occupancy = calculate_total_occupancy(df, level, time, week,day)
+
+#     #occupancy by seat types by floor
+#     form_seat_types_occupancy(df, level,time,week,day)
+
+#     # Three different graphs, comment out the ones you don't want
+#     # occupancy_by_time(level, time, week, day)
+#     # occupancy_by_level(time, week, day)
+#     # occupancy_by_seat(level, time, week, day)
+
+#     # region = regions_coordinates[level]
+#     # students = form_seat_types_occupancy(df,level,time,week,day)
+#     # image_path = images_path[level]
+#     # image = cv2.imread(image_path)
+#     # heatmap_floor = generate_floorplan_contour(image_path, region, students)
+    
+
+#     return render_template('floor_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
+
+
+@app.route('/get_time_overall', methods=['POST'])
+def overall():
+    level = {'3','4','5','6','6Chinese'}
     week = request.form.get('week')
+    time = int(request.form.get('time'))
     day = int(request.form.get('day'))
 
+    occupancy_by_level(time, week, day)
+
+    #generating heatmaps for all floor
+    for i in level:
+        generate_heatmap(i,week,time,day)
+    
     #total occupancy for all floors
     total_occupancy = calculate_total_occupancy(df, level, time, week,day)
 
-    #occupancy by seat types by floor
-    form_seat_types_occupancy(df, level,time,week,day)
-
-    # Three different graphs, comment out the ones you don't want
-    # occupancy_by_time(level, time, week, day)
-    # occupancy_by_level(time, week, day)
-    # occupancy_by_seat(level, time, week, day)
-
-    # region = regions_coordinates[level]
-    # students = form_seat_types_occupancy(df,level,time,week,day)
-    # image_path = images_path[level]
-    # image = cv2.imread(image_path)
-    # heatmap_floor = generate_floorplan_contour(image_path, region, students)
-    
-
-    return render_template('floor_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
+    return render_template('overall_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
 
 
-@app.route('/overall_view')
-def overall_view():
-    timing = request.form.get('time')
-    level = request.form.get('level')
-    floor_data = [
-        {'floor': "Level 3", 'occupancy': 60},
-        { 'floor': "Level 4", 'occupancy': 80 },
-        { 'floor': "Level 5", 'occupancy': 70 },
-        { 'floor': "Level 6", 'occupancy': 90 },
-        { 'floor': "Level 6 (Chinese Library)", 'occupancy': 75 }
-    ]
-    circles=[]
-    for data in floor_data:
-        circle_size = data['occupancy']*2
 
-        circle=pltly.Scatter(
-            x=[0],
-            y=[0],
-            mode='markers',
-            marker=dict(size=circle_size, color='red'),
-            hoverinfo='text',
-            hovertext=f'{data["floor"]}<br>Occupancy: {data["occupancy"]}%'
-        )
-        circles.append(circle)
+def calculate_total_occupancy(df,level,time,week,day):
+    if level == "overall":
+        filtered_df = df[(df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
+        occupancy = filtered_df['occupancy'].sum()
+        return occupancy
+    # Filter the DataFrame based on the parameters, replace for more filters
+    filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
+    # Calculate the total occupancy for the filtered data
+    occupancy = filtered_df['occupancy'].sum()
 
-    figure = pltly.Figure(data=circles)
-    circle_divs = [f.to_html(full_html=False) for f in figure.to_dict()["data"]]
-
-    return render_template('overall_view.html', circle_divs=circle_divs)
-
-@app.route('/floor/<floor>')
-def floor_view(floor):
-    floor = request.form.get('floor')
-
-    return render_template('floor_view.html', floor=floor)
+    return occupancy
 
 def form_seat_types_occupancy(df, level,time,week,day):
     filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
@@ -138,46 +135,6 @@ def form_seat_types_occupancy(df, level,time,week,day):
     return seat_type
 
 
-def calculate_total_occupancy(df,level,time,week,day):
-    # Filter the DataFrame based on the parameters, replace for more filters
-    filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
-    # Calculate the total occupancy for the filtered data
-    occupancy = filtered_df['occupancy'].sum()
-    return occupancy
-
-
-# Generate barplot of Occupancy over time for a specific week, day and level
-def occupancy_by_time(level, time, week, day):
-    plot1y = []
-    plot1x = []
-    col = []
-
-    # Calculate occupancy across the day, add color red to current hour
-    for i in range(9,22):
-        filtered_df = df[(df['level'] == level) & (df['hour'] == i) & (df["week"] == week) &(df["day"] == day) ]
-        # Calculate the total occupancy for the filtered data
-        fil = filtered_df['occupancy'].sum()
-        plot1y.append(fil)
-        plot1x.append(i)
-        if i == time:
-            col.append("red")
-        else:
-            col.append("black")
-
-    # Plot graph
-    fig = go.Figure(data=go.Bar(x=plot1x, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=34),textfont_size=24))
-    # Add labels and title
-    fig.update_layout( xaxis_title="", yaxis_title=dict(text = 'Occupancy', font=dict(size=30)),plot_bgcolor='white')
-    new_tick_values = ["9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm", "9pm"]
-    fig.update_xaxes(type='category', tickmode='array', tickvals=plot1x, ticktext=new_tick_values,tickfont=dict(size=30))
-    fig.update_yaxes(tickfont=dict(size=20))
-    fig.update_traces(
-    textposition='outside',  
-    textfont=dict(size=24, color='black')
-    ,marker_color=col)
-
-    fig.write_html("templates/occupancy_by_time.html")
-    #fig.show()
 
 # Generate a barplot of Occupancy by Level
 def occupancy_by_level(time, week, day):
@@ -205,49 +162,17 @@ def occupancy_by_level(time, week, day):
     textfont=dict(size=24, color='black')
     ,marker_color=colors)
 
-    fig.write_html("templates/occupancy_by_level.html")
-    #fig.show()
+    fig.write_html("./templates/plots/occupancy_by_level.html")
 
-# Generate a barplot of Occupancy by seats at a specific level
-def occupancy_by_seat(level, time, week, day):
-    plot1y = []
-    x_names= []
-    colors = ['#053F5C', '#429EBD', '#9FE7F5', '#F7AD19', '#F27F0C']
+# Generate heatmaps of all level
+def generate_heatmap(level, week, hour, day):
+    region = regions_coordinates[level]
+    students = form_seat_types_occupancy(df, level, hour, week, day)
+    image_path = images_path[level]
+    heatmap_fig = generate_floorplan_contour_html(image_path, region, students,level,seat_names,actual_seat_count)
+    return heatmap_fig
 
-    #Find seat types for current level
-    list1 = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
-    seat_filter = pd.Series(list1["seat_type"]).drop_duplicates().tolist()
-    print(seat_filter)
-    print
 
-    #Give nicer names to current seat types
-    seat_names = {"Discussion.Cubicles": "Discussion Cubicles", "Soft.seats" : "Soft Seats", "Moveable.seats": "Moveable Seats",
-                  "Sofa":"Sofa","Windowed.Seats":"Windowed Seats","X4.man.tables":"4 Man Tables","X8.man.tables":"8 Man Tables",
-                  "Diagonal.Seats": "Diagonal Seats","Cubicle.seats":"Cubicle Seats"}
-    
-    #Find occupancy by seat types
-    for i in seat_filter:
-        filtered_df = list1[(df['seat_type'] == i) ]
-        # Calculate the total occupancy for the filtered data
-        fil = filtered_df['occupancy'].sum()
-        plot1y.append(fil)
-        #Retrieve nicer name format from dictionary
-        x_names.append(seat_names.get(i))
-
-    # Plot graph
-    fig = go.Figure(data=go.Bar(x=seat_filter, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=34),textfont_size=24))
-    # Add labels and title
-    fig.update_layout( xaxis_title="", yaxis_title=dict(text = 'Occupancy', font=dict(size=30)),plot_bgcolor='white')
-    new_tick_values = x_names
-    fig.update_xaxes(type='category', tickmode='array', tickvals=seat_filter, ticktext=new_tick_values,tickfont=dict(size=30))
-    fig.update_yaxes(tickfont=dict(size=20))
-    fig.update_traces(
-    textposition='outside',  
-    textfont=dict(size=24, color='black')
-    ,marker_color=colors)
-
-    fig.write_html("templates/occupancy_by_seat.html")
-    #fig.show()
 
 if __name__ == '__main__':
     app.run(debug=True, port= 5050)

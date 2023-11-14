@@ -15,9 +15,6 @@ import plotly.subplots as sp
 # Your existing Flask app
 app = Flask(__name__, static_url_path='/', static_folder='templates')
 
-# Load dataset
-csv_file_path = 'datasets/model_output.csv'
-df = pd.read_csv(csv_file_path)
 
 # Create a Dash app
 dash_app = Dash(__name__, server=app, url_base_pathname='/dashboard/')
@@ -25,7 +22,7 @@ dash_app = Dash(__name__, server=app, url_base_pathname='/dashboard/')
 #server = app.server
 
 # Load dataset
-csv_file_path = 'datasets/model_output.csv'
+csv_file_path = '../datasets/model_output.csv'
 df = pd.read_csv(csv_file_path)
 
 ## predefined inputs
@@ -184,20 +181,20 @@ def check_occupancy():
     return render_template('floor_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
 
 #Check overall button on home page
-@app.route('/get_time_overall', methods=['POST'])
-def overall():
-    level = "overall"
-    week = request.form.get('week')
-    time = int(request.form.get('time'))
-    day = int(request.form.get('day'))
+# @app.route('/get_time_overall', methods=['POST'])
+# def overall():
+#     level = "overall"
+#     week = request.form.get('week')
+#     time = int(request.form.get('time'))
+#     day = int(request.form.get('day'))
 
-    occupancy_by_time(level, time, week, day)
-    occupancy_by_level(time, week, day)
-    occupancy_by_seat(level, time, week, day)
-    #total occupancy for all floors
-    total_occupancy = calculate_total_occupancy(df, level, time, week,day)
+#     occupancy_by_time(level, time, week, day)
+#     occupancy_by_level(time, week, day)
+#     occupancy_by_seat(level, time, week, day)
+#     #total occupancy for all floors
+#     total_occupancy = calculate_total_occupancy(df, level, time, week,day)
 
-    return render_template('overall_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
+#     return render_template('overall_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
 
 
 def calculate_total_occupancy(df,level,time,week,day):

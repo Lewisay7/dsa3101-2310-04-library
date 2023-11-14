@@ -140,13 +140,14 @@ dash_app.layout = html.Div([
                 multi=False,
                 style={'width': '100%', 'margin-bottom': '10px'}
             ),
-        ], style={'width': '20%', 'margin-right': '20px', 'padding': '20px'}),  # Stacked dropdowns with some styling
+        ], style={'width': '15%', 'margin-right': '20px', 'padding': '20px','margin-right': '15px'}),  # Stacked dropdowns with some styling
 
         # Graphs
         html.Div([
-            dcc.Graph(id='occupancy-by-time', style={'width': '30%', 'height': '600px', 'border': '4px solid black', 'margin-right': '60px'}),
-            dcc.Graph(id='occupancy-by-level', style={'width': '30%', 'height': '600px', 'border': '4px solid black'}),
-        ], style={'width': '70%', 'display': 'flex', 'flex-wrap': 'wrap'}),  # Graphs with flex wrap to handle responsive layout
+            dcc.Graph(id='occupancy-by-time', style={'width': '30%', 'height': '450px', 'border': '4px solid black', 'margin-right': '15px'}),
+            dcc.Graph(id='occupancy-by-level', style={'width': '30%', 'height': '450px', 'border': '4px solid black', 'margin-right': '15px'}),
+            dcc.Graph(id='occupancy-by-seat', style={'width': '30%', 'height': '450px', 'border': '4px solid black'}),
+        ], style={'width': '85%', 'display': 'flex', 'flex-wrap': 'wrap'}),  # Graphs with flex wrap to handle responsive layout
     ], style={'display': 'flex', 'margin-bottom': '60px'}),
 
     # Second Row
@@ -154,9 +155,8 @@ dash_app.layout = html.Div([
         # Graphs with spacing
         html.Div([
             dcc.Graph(id='occupancy-by-level-pie', style={'width': '30%', 'height': '400px', 'margin-right': '60px'}),
-            dcc.Graph(id='occupancy-by-seat', style={'width': '30%', 'height': '600px', 'border': '4px solid black', 'margin-right': '60px'}),
-            dcc.Graph(id='heatmap', style={'width': '30%', 'height': '600px', 'border': '4px solid black', 'margin-right': '60px'}),
-        ], style={'display': 'flex', 'justify-content': 'space-between', 'margin-bottom': '30px'}),
+            dcc.Graph(id='heatmap', style={'width': '30%', 'height': '600px'}),
+        ], style={'display': 'flex', 'margin-bottom': '30px'}),
     ]),
 ])
 

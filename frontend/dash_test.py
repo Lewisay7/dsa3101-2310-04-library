@@ -134,12 +134,19 @@ dash_app.layout = html.Div([
         value=1,
         multi=False,
         style={'width': '50%'}
-    ),
-    dcc.Graph(id='occupancy-by-time'),
-    dcc.Graph(id='occupancy-by-level'),
-    dcc.Graph(id='occupancy-by-seat'),
-    dcc.Graph(id='heatmap'),
-    dcc.Graph(id='occupancy-by-level-pie'),
+    ),  # Add a comma here
+
+    html.Div([
+        dcc.Graph(id='occupancy-by-time',style={'width': '30%', 'height': '600px','border': '4px solid black','margin-right': '60px'}),
+        dcc.Graph(id='occupancy-by-level',style={'width': '30%', 'height': '600px','border': '4px solid black'}),
+    ], style={'display': 'flex', 'justify-content': 'flex-end', 'margin-bottom': '60px'}),
+
+    html.Div([
+        dcc.Graph(id='occupancy-by-level-pie',style={'width': '30%', 'height': '400px'}),
+        dcc.Graph(id='occupancy-by-seat',style={'width': '30%', 'height': '600px','border': '4px solid black','margin-right': '60px'}),
+        dcc.Graph(id='heatmap',style={'width': '30%', 'height': '600px','border': '4px solid black','margin-right': '60px'}),
+    ], style={'display': 'flex', 'justify-content': 'space-between', 'margin-bottom': '30px'}),
+
 ])
 
 @dash_app.callback(
@@ -157,10 +164,10 @@ def update_all_graphs(selected_level, selected_week, selected_hour, selected_day
     fig_time = occupancy_by_time(selected_level, selected_hour, selected_week, selected_day)
     fig_level = occupancy_by_level(selected_hour, selected_week, selected_day)
     fig_seat = occupancy_by_seat(selected_level, selected_hour, selected_week, selected_day)
-    pie_chart = occupancy_by_level_pie(selected_hour,selected_week,selected_day)
+    pie_chart = occupancy_level_pie(selected_level,selected_hour,selected_week,selected_day)
 
     # Generate heatmap using the new function
-    heatmap_fig = generate_heatmap(selected_level, selected_week, selected_hour, selected_day)
+    heatmap_fig = generate_heatmap_fig(selected_level, selected_week, selected_hour, selected_day)
     
     return fig_time, fig_level, fig_seat, heatmap_fig, pie_chart
 
@@ -202,7 +209,7 @@ def overall():
     total_occupancy = overall_occupancy(df,time, week,day)
     total_rate = overall_occupancy_rate(df, seat_df,time,week,day)
 
-    return render_template('overall_view.html',  time=time, level=level, total_occupancy=total_occupancy, total_rate = total_rate,week=week, day=day)
+    return render_template('overall_view.html')
 
 
 #total number of students for all floor
@@ -330,7 +337,12 @@ def generate_heatmap(level, week, hour, day):
     heatmap_fig = generate_floorplan_contour_html(image_path, region, students,level,seat_names,actual_seat_count)
     return heatmap_fig
 
-
+def generate_heatmap_fig(level, week, hour, day):
+    region = regions_coordinates[level]
+    students = form_seat_types_occupancy(df, level, hour, week, day)
+    image_path = images_path[level]
+    heatmap_fig = generate_floorplan_contour(image_path, region, students,level,seat_names,actual_seat_count)
+    return heatmap_fig
 
 def calculate_total_occupancy(df,level,time,week,day):
     if level == "overall":
@@ -492,6 +504,26 @@ def occupancy_by_level_pie(time,week,day):
 
     return fig
 
+
+# Create pie chart for single floor
+def occupancy_level_pie(level,time,week,day):
+
+    max_seat = pd.read_csv('datasets/actual_seat_count.csv')
+    # Calculate the total occupancy for the filtered data
+    # Get Occupancy by level 
+    fil = calculate_total_occupancy(df, level, time, week,day)
+    filtered_seat = max_seat[(df['level'] == level)]
+    occupancy = filtered_seat['count'].sum()
+    non_occupied = occupancy-fil
+    occupied_vs_non = [fil,non_occupied]
+    vslabels = ["Occupied", "Not Occupied"]
+
+    fig = go.Figure(data=[go.Pie(labels=vslabels, values=occupied_vs_non)])
+    fig.update_layout(title_text="Occupied vs Not Occupied", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+    # Update layout
+    fig.update_layout(title_text="Occupancy")
+
+    return fig
 
 if __name__ == '__main__':
     app.run(debug=True, port=5050)

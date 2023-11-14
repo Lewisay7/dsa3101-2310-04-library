@@ -133,13 +133,14 @@ def generate_floorplan_contour_html(image_path, region, students,level,seat_name
     fig.update_layout(
         width=600,
         height=400,
-        title = f"Level{level}",
+        title=f"Level{level}",
         xaxis=dict(visible=False),
         yaxis=dict(visible=False),
         coloraxis_colorbar=dict(
             tickvals=np.linspace(0, max(students.values()), len(color_list)).tolist(),
             ticktext=np.linspace(0, max(students.values()), len(color_list)).astype(int).tolist(),
-        )
+        ),
+        bargap=0  # Remove the gap between bars
     )
    
     # Add traces to the figure
@@ -216,8 +217,6 @@ def generate_floorplan_contour(image_path, region, students,level,seat_names,act
             tickvals=np.linspace(0, max(students.values()), len(color_list)).tolist(),
             ticktext=np.linspace(0, max(students.values()), len(color_list)).astype(int).tolist(),
         ),
-        paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
-        plot_bgcolor='rgba(0,0,0,0)'  # Transparent plot background
     )
 
     # Add traces to the figure

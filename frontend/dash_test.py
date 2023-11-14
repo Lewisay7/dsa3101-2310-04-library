@@ -212,7 +212,7 @@ def overall():
     #generating heatmaps for all floor
     for i in level:
         generate_heatmap(i,week,time,day)
-    
+
     #total occupancy for all floors
     df = pd.read_csv(csv_file_path)
     seat_df = pd.read_csv(actual_seat_path)
@@ -257,7 +257,8 @@ def overall_occupancy_rate(df, seat_df, time, week,day):
     total_seats = 0
     for i in range(seat_df.shape[0]):
         total_seats += seat_df.iloc[i]['count']
-    total_rate = round(occupancy/total_seats,2)*100
+    total_rate = occupancy/total_seats*100
+    total_rate = round(total_rate,1)
     return total_rate
     
 #function to get a dictionary containing capacity by floor
@@ -285,7 +286,7 @@ def overall_occupancy_by_level(time, week, day):
         plot1y.append(fil)
 
     # Plot graph
-    fig = go.Figure(data=go.Bar(x=plot1x, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=20),textfont_size=20))
+    """fig = go.Figure(data=go.Bar(x=plot1x, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=20),textfont_size=20))
     # Add labels and title
     fig.update_layout(  xaxis_title="", 
                         yaxis_title=dict(text = 'Occupancy', font=dict(size=20)),
@@ -300,7 +301,19 @@ def overall_occupancy_by_level(time, week, day):
     fig.update_yaxes(tickfont=dict(size=10))
     fig.update_traces(textposition='outside',  
                       textfont=dict(size=15, color='black'),
-                      marker_color=colors)
+                      marker_color=colors)"""
+    max_y_axis = max(plot1y)*1.2
+    fig = go.Figure(data=go.Bar(x=plot1x, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=20),textfont_size=24))
+    # Add labels and title
+    fig.update_layout( xaxis_title="", yaxis_title="", title=dict(text = "<b>"+'Occupancy in each Level'+"</b>", font=dict(size=20,)), title_x = 0.5,plot_bgcolor='white',margin=dict(t=50,b=10) )
+    new_tick_values = ["Level 3", "Level 4", "Level 5", "Level 6", "Chinese"]
+    fig.update_xaxes(type='category', tickmode='array', tickvals=plot1x, ticktext=new_tick_values,tickfont=dict(size=15))
+    fig.update_yaxes(tickfont=dict(size=15), range = [0, max_y_axis])
+    fig.update_traces(
+    textposition='outside',  
+    textfont=dict(size=15, color='black')
+    ,marker_color=colors)
+
     fig.write_html("./templates/overall_plots/occupancy_by_level.html")
 
 #generate a horizontal bar plot of occupancy rates by level
@@ -320,7 +333,7 @@ def rate_by_level(time, week, day):
     # Format the text with percentage and customize hover text
     text_data = [f"{occupancy_rate * 100:.2f}%" for occupancy_rate in plot1y]
     hover_text = [f"Level {level}<br>Occupancy Rate: {occupancy_rate * 100:.2f}%" for level, occupancy_rate in zip(plot1x, plot1y)]
-    fig = go.Figure(data=go.Bar(y=plot1x, x=plot1y, text=text_data, hovertext=hover_text, textposition='outside',
+    """fig = go.Figure(data=go.Bar(y=plot1x, x=plot1y, text=text_data, hovertext=hover_text, textposition='outside',
                                 textfont=dict(size=20), textfont_size=20, orientation='h', hovertemplate="%{hovertext}"))
     
 
@@ -340,7 +353,27 @@ def rate_by_level(time, week, day):
         textposition='outside',
         textfont=dict(size=15, color='black'),
         marker_color=colors
-    )
+    )"""
+    ticks = []
+    tictex = []
+    i=0
+    while i < max(plot1y)+1:
+        ticks.append(i) 
+        tictex.append(str(int(round(i*100,0)))+"%")
+        i+=0.1
+
+    max_y_axis = max(plot1y)*1.2
+    fig = go.Figure(data=go.Bar(y=plot1x, x=plot1y, text=text_data, hovertext=hover_text, textposition='outside',
+                                textfont=dict(size=20), textfont_size=20, orientation='h', hovertemplate="%{hovertext}"))
+    # Add labels and title
+    fig.update_layout( xaxis_title="Occupancy Rate", yaxis_title="", title=dict(text = "<b>"+'Occupancy rate in each Level'+"</b>", font=dict(size=20,)), title_x = 0.5,plot_bgcolor='white',margin=dict(t=50,b=10) )
+    new_tick_values = ["Level 3", "Level 4", "Level 5", "Level 6", "Chinese"]
+    fig.update_yaxes(type='category', tickmode='array', tickvals=plot1x, ticktext=new_tick_values,tickfont=dict(size=15))
+    fig.update_xaxes(tickfont=dict(size=15), range = [0, max_y_axis],tickvals=ticks,ticktext = tictex)
+    fig.update_traces(
+    textposition='outside',  
+    textfont=dict(size=15, color='black')
+    ,marker_color=colors)
 
     fig.write_html("./templates/overall_plots/rate_by_level.html")
 

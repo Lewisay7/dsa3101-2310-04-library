@@ -223,6 +223,7 @@ def overall():
               '13':"1 pm",'14':"2 pm",'15':"3 pm",'16':"4 pm",'17':"5 pm",'18':"6 pm",'19':"7 pm",'20':"8 pm",'21':"9 pm",'22':"10 pm",'23':"11 pm",'24':"12 am"}
     total_occupancy = overall_occupancy(df,time, week,day)
     total_rate = overall_occupancy_rate(df, seat_df,time,week,day)
+    overall_gauge_chart(total_rate)
 
     return render_template('overall_view.html',day = days.get(day_string), time = timing.get(time_string), week = week, total_occupancy = total_occupancy, total_rate = total_rate)
 
@@ -245,6 +246,10 @@ def level_total_occupancy(df,level,time,week,day):
 def form_seat_types_occupancy(df, level,time,week,day):
     filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
     seat_type = {}
+    if filtered_df.empty:
+        for i in actual_seat_count[level].keys():
+            seat_type[i] = 0
+
     for i in range(filtered_df.shape[0]):
         seat = filtered_df.iloc[i]['seat_type']
         number = filtered_df.iloc[i]['occupancy']
@@ -384,6 +389,28 @@ def generate_heatmap(level, week, hour, day):
     image_path = images_path[level]
     heatmap_fig = generate_floorplan_contour_html(image_path, region, students,level,seat_names,actual_seat_count)
     return heatmap_fig
+
+#generate gauge chart of overall occupancy
+def overall_gauge_chart(occupancy_percentage):
+    fig = go.Figure()
+
+    fig.add_trace(go.Indicator(
+        domain={'x': [0, 1], 'y': [0, 1]},
+        value=occupancy_percentage,
+        mode="gauge+number",
+        gauge={
+            'axis': {'range': [None, 100]},
+            'bar': {'color': "orange"},
+        }
+    ))
+
+    fig.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+    fig.write_html("./templates/overall_plots/gauge.html")
+
+
 
 def generate_heatmap_fig(level, week, hour, day):
     region = regions_coordinates[level]

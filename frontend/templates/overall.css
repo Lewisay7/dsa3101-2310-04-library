@@ -198,6 +198,10 @@ form#level input[type="submit"]:hover {
   color:#053F5C;
   font-size: 40px;
 }
+.occupancy-rate {
+  margin-bottom: -130px; /* Adjust the margin as needed */
+  padding-bottom: 20px ;
+}
 
 .number {
   color: rgb(244, 22, 22);
@@ -212,7 +216,7 @@ form#level input[type="submit"]:hover {
   display: flex;
   gap: 20px;
   height : 400px;
-  padding : 0 5px;
+  padding : 0 20px;
 }
 
 .widget {
@@ -221,7 +225,7 @@ form#level input[type="submit"]:hover {
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 5px;
-    padding: 10px;
+    padding: 5px;
     flex: 1;
 }
 
@@ -231,7 +235,11 @@ form#level input[type="submit"]:hover {
     border: none;
 }
 
+
 #totalOccupancyWidget{
+    margin-bottom: -50px;
+    border: none;
+    background-color:#ffffff00 ;
     margin: 0;
     font-size: 30px;
     color: #302f49;

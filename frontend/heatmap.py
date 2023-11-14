@@ -67,10 +67,7 @@ def compute_contour_data(seat_type, coordinates_list, students, contour_data, te
         text_data[inverted_y1:inverted_y2 + 1, x1:x2 + 1] = f"Seat Type: {seat}<br>Student Count: {student_count}<br>Occupancy Rate: {occupancy_rate}%"
 
 def generate_floorplan_contour_html(image_path, region, students,level,seat_names,actual_seat_count):
-    if not students:
-        # Handle the case where there are no students for the given floor
-        print(f"No students data for {level}")
-        return None
+
     # Load the floorplan image and convert to data URI
     with open(image_path, "rb") as image_file:
         encoded_image = base64.b64encode(image_file.read()).decode("utf-8")

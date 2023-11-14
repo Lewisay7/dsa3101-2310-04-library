@@ -74,79 +74,89 @@ seat_names = {"Discussion.Cubicles": "Discussion Cubicles", "Soft.seats" : "Soft
 
 
 dash_app.layout = html.Div([
-    dcc.Dropdown(
-        id='level-dropdown',
-        options=[
-            {'label': 'Level 3', 'value': '3'},
-            {'label': 'Level 4', 'value': '4'},
-            {'label': 'Level 5', 'value': '5'},
-            {'label': 'Level 6', 'value': '6'},
-            {'label': 'Level 6 (Chinese)', 'value': '6Chinese'}
-        ],
-        value="3",
-        multi=False,
-        style={'width': '50%'}
-    ),
-    dcc.Dropdown(
-        id='week-dropdown',
-        options=[
-            {'label': 'Week 1', 'value': '1'},
-            {'label': 'Week 2', 'value': '2'},
-            {'label': 'Week 3', 'value': '3'},
-            {'label': 'Week 4', 'value': '4'},
-            {'label': 'Week 5', 'value': '5'},
-            {'label': 'Week 6', 'value': '6'},
-            {'label': 'Week 7', 'value': '7'},
-            {'label': 'Week 8', 'value': '8'},
-            {'label': 'Week 9', 'value': '9'},
-            {'label': 'Week 10', 'value': '10'},
-            {'label': 'Week 11', 'value': '11'},
-            {'label': 'Week 12', 'value': '12'},
-            {'label': 'Week 13', 'value': '13'},
-            {'label': 'Exam Week', 'value': 'Exam'},
-            {'label': 'Reading Week', 'value': 'Reading'},
-            {'label': 'Recess week', 'value': 'Recess'}
-        ],
-        value="1",
-        multi=False,
-        style={'width': '50%'}
-    ),
-    dcc.Dropdown(
-        id='hour-dropdown',
-        options=[
-            {'label': f'{i}am' if i < 12 else f'{i-12}pm' if i > 12 else '12pm', 'value': i} for i in range(9, 22)
-        ],
-        value=9,
-        multi=False,
-        style={'width': '50%'}
-    ),
-    dcc.Dropdown(
-        id='day-dropdown',
-        options=[
-            {'label': 'Monday', 'value': 1},
-            {'label': 'Tuesday', 'value': 2},
-            {'label': 'Wednesday', 'value': 3},
-            {'label': 'Thursday', 'value': 4},
-            {'label': 'Friday', 'value': 5},
-            {'label': 'Saturday', 'value': 6},
-            {'label': 'Sunday', 'value': 7}
-        ],
-        value=1,
-        multi=False,
-        style={'width': '50%'}
-    ),  # Add a comma here
-
+    # First Row
     html.Div([
-        dcc.Graph(id='occupancy-by-time',style={'width': '30%', 'height': '600px','border': '4px solid black','margin-right': '60px'}),
-        dcc.Graph(id='occupancy-by-level',style={'width': '30%', 'height': '600px','border': '4px solid black'}),
-    ], style={'display': 'flex', 'justify-content': 'flex-end', 'margin-bottom': '60px'}),
+        # Stacked dropdowns
+        html.Div([
+            dcc.Dropdown(
+                id='level-dropdown',
+                options=[
+                    {'label': 'Level 3', 'value': '3'},
+                    {'label': 'Level 4', 'value': '4'},
+                    {'label': 'Level 5', 'value': '5'},
+                    {'label': 'Level 6', 'value': '6'},
+                    {'label': 'Level 6 (Chinese)', 'value': '6Chinese'}
+                ],
+                value="3",
+                multi=False,
+                style={'width': '100%', 'margin-bottom': '10px'}
+            ),
+            dcc.Dropdown(
+                id='week-dropdown',
+                options=[
+                    {'label': 'Week 1', 'value': '1'},
+                    {'label': 'Week 2', 'value': '2'},
+                    {'label': 'Week 3', 'value': '3'},
+                    {'label': 'Week 4', 'value': '4'},
+                    {'label': 'Week 5', 'value': '5'},
+                    {'label': 'Week 6', 'value': '6'},
+                    {'label': 'Week 7', 'value': '7'},
+                    {'label': 'Week 8', 'value': '8'},
+                    {'label': 'Week 9', 'value': '9'},
+                    {'label': 'Week 10', 'value': '10'},
+                    {'label': 'Week 11', 'value': '11'},
+                    {'label': 'Week 12', 'value': '12'},
+                    {'label': 'Week 13', 'value': '13'},
+                    {'label': 'Exam Week', 'value': 'Exam'},
+                    {'label': 'Reading Week', 'value': 'Reading'},
+                    {'label': 'Recess week', 'value': 'Recess'}
+                ],
+                value="1",
+                multi=False,
+                style={'width': '100%', 'margin-bottom': '10px'}
+            ),
+            dcc.Dropdown(
+                id='hour-dropdown',
+                options=[
+                    {'label': f'{i}am' if i < 12 else f'{i-12}pm' if i > 12 else '12pm', 'value': i} for i in range(9, 22)
+                ],
+                value=9,
+                multi=False,
+                style={'width': '100%', 'margin-bottom': '10px'}
+            ),
+            dcc.Dropdown(
+                id='day-dropdown',
+                options=[
+                    {'label': 'Monday', 'value': 1},
+                    {'label': 'Tuesday', 'value': 2},
+                    {'label': 'Wednesday', 'value': 3},
+                    {'label': 'Thursday', 'value': 4},
+                    {'label': 'Friday', 'value': 5},
+                    {'label': 'Saturday', 'value': 6},
+                    {'label': 'Sunday', 'value': 7}
+                ],
+                value=1,
+                multi=False,
+                style={'width': '100%', 'margin-bottom': '10px'}
+            ),
+        ], style={'width': '20%', 'margin-right': '20px', 'padding': '20px'}),  # Stacked dropdowns with some styling
 
+        # Graphs
+        html.Div([
+            dcc.Graph(id='occupancy-by-time', style={'width': '30%', 'height': '600px', 'border': '4px solid black', 'margin-right': '60px'}),
+            dcc.Graph(id='occupancy-by-level', style={'width': '30%', 'height': '600px', 'border': '4px solid black'}),
+        ], style={'width': '70%', 'display': 'flex', 'flex-wrap': 'wrap'}),  # Graphs with flex wrap to handle responsive layout
+    ], style={'display': 'flex', 'margin-bottom': '60px'}),
+
+    # Second Row
     html.Div([
-        dcc.Graph(id='occupancy-by-level-pie',style={'width': '30%', 'height': '400px'}),
-        dcc.Graph(id='occupancy-by-seat',style={'width': '30%', 'height': '600px','border': '4px solid black','margin-right': '60px'}),
-        dcc.Graph(id='heatmap',style={'width': '30%', 'height': '600px','border': '4px solid black','margin-right': '60px'}),
-    ], style={'display': 'flex', 'justify-content': 'space-between', 'margin-bottom': '30px'}),
-
+        # Graphs with spacing
+        html.Div([
+            dcc.Graph(id='occupancy-by-level-pie', style={'width': '30%', 'height': '400px', 'margin-right': '60px'}),
+            dcc.Graph(id='occupancy-by-seat', style={'width': '30%', 'height': '600px', 'border': '4px solid black', 'margin-right': '60px'}),
+            dcc.Graph(id='heatmap', style={'width': '30%', 'height': '600px', 'border': '4px solid black', 'margin-right': '60px'}),
+        ], style={'display': 'flex', 'justify-content': 'space-between', 'margin-bottom': '30px'}),
+    ]),
 ])
 
 @dash_app.callback(
@@ -186,7 +196,7 @@ def check_occupancy():
     #total occupancy for all floors
     total_occupancy = calculate_total_occupancy(df, level, time, week,day)
 
-    return render_template('floor_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)
+    return render_template('floor_view.html')
 
 @app.route('/get_time_overall', methods=['POST'])
 def overall():
@@ -205,11 +215,15 @@ def overall():
     #total occupancy for all floors
     df = pd.read_csv(csv_file_path)
     seat_df = pd.read_csv(actual_seat_path)
-    
+    time_string = str(time)
+    day_string = str(day)
+    days = {'1': 'Monday', '2':'Tuesday', '3':'Wednesday', '4':'Thursday', '5': 'Friday', '6': 'Saturday', '7':' Sunday'}
+    timing = {'1':"1 am", '2':"2 am",'3':"3 am",'4':"4 am",'5':"5 am",'6':"6 am",'7':"7 am",'8':"8 am",'9':"9 am",'10':"10 am",'11':"11 am",'12':"12 pm",
+              '13':"1 pm",'14':"2 pm",'15':"3 pm",'16':"4 pm",'17':"5 pm",'18':"6 pm",'19':"7 pm",'20':"8 pm",'21':"9 pm",'22':"10 pm",'23':"11 pm",'24':"12 am"}
     total_occupancy = overall_occupancy(df,time, week,day)
     total_rate = overall_occupancy_rate(df, seat_df,time,week,day)
 
-    return render_template('overall_view.html')
+    return render_template('overall_view.html',day = days.get(day_string), time = timing.get(time_string), week = week, total_occupancy = total_occupancy, total_rate = total_rate)
 
 
 #total number of students for all floor

@@ -139,8 +139,7 @@ def generate_floorplan_contour_html(image_path, region, students,level,seat_name
         coloraxis_colorbar=dict(
             tickvals=np.linspace(0, max(students.values()), len(color_list)).tolist(),
             ticktext=np.linspace(0, max(students.values()), len(color_list)).astype(int).tolist(),
-        ),
-        template='plotly_white',
+        )
     )
    
     # Add traces to the figure
@@ -219,7 +218,8 @@ def generate_floorplan_contour(image_path, region, students,level,seat_names,act
             tickvals=np.linspace(0, max(students.values()), len(color_list)).tolist(),
             ticktext=np.linspace(0, max(students.values()), len(color_list)).astype(int).tolist(),
         ),
-        template='plotly_white',
+        paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
+        plot_bgcolor='rgba(0,0,0,0)'  # Transparent plot background
     )
 
     # Add traces to the figure
@@ -228,13 +228,3 @@ def generate_floorplan_contour(image_path, region, students,level,seat_names,act
     return fig
 
 
-# Example usage
-
-# level = '6Chinese'
-# week = '9'
-# day = 3
-# time = 14
-# region = regions_coordinates[level]
-# image_path = images_path[level]
-# students = form_seat_types_occupancy(df, level,time,week,day)
-#generate_floorplan_contour(image_path, regions_coordinates[level], students,level)

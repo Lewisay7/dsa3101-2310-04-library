@@ -1,3 +1,4 @@
+import math
 from flask import Flask, render_template, request
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.ticker import MaxNLocator
@@ -286,15 +287,20 @@ def overall_occupancy_by_level(time, week, day):
     # Plot graph
     fig = go.Figure(data=go.Bar(x=plot1x, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=20),textfont_size=20))
     # Add labels and title
-    fig.update_layout( xaxis_title="", yaxis_title=dict(text = 'Occupancy', font=dict(size=30)),plot_bgcolor='white')
-    new_tick_values = ["Level 3", "Level 4", "Level 5", "Level 6", "Level 6 Chinese"]
-    fig.update_xaxes(type='category', tickmode='array', tickvals=plot1x, ticktext=new_tick_values,tickfont=dict(size=20))
-    fig.update_yaxes(tickfont=dict(size=20))
-    fig.update_traces(
-    textposition='outside',  
-    textfont=dict(size=24, color='black')
-    ,marker_color=colors)
-    fig.update_layout(height=300, width=500)  # Adjust the height and width as needed
+    fig.update_layout(  xaxis_title="", 
+                        yaxis_title=dict(text = 'Occupancy', font=dict(size=20)),
+                        autosize=True,
+                        margin=dict(l=0, r=0, t=60 , b=30),paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+    new_tick_values = ["Level 3", "Level 4", "Level 5", "Level 6", "Level 6 C"]
+    fig.update_xaxes(type='category', 
+                     tickmode='array', 
+                     tickvals=plot1x, 
+                     ticktext=new_tick_values,
+                     tickfont=dict(size=15))
+    fig.update_yaxes(tickfont=dict(size=10))
+    fig.update_traces(textposition='outside',  
+                      textfont=dict(size=15, color='black'),
+                      marker_color=colors)
     fig.write_html("./templates/overall_plots/occupancy_by_level.html")
 
 #generate a horizontal bar plot of occupancy rates by level
@@ -314,30 +320,24 @@ def rate_by_level(time, week, day):
     # Format the text with percentage and customize hover text
     text_data = [f"{occupancy_rate * 100:.2f}%" for occupancy_rate in plot1y]
     hover_text = [f"Level {level}<br>Occupancy Rate: {occupancy_rate * 100:.2f}%" for level, occupancy_rate in zip(plot1x, plot1y)]
-    # Plot graph
     fig = go.Figure(data=go.Bar(y=plot1x, x=plot1y, text=text_data, hovertext=hover_text, textposition='outside',
                                 textfont=dict(size=20), textfont_size=20, orientation='h', hovertemplate="%{hovertext}"))
-    # Set orientation to 'h' for horizontal bar plot
+    
 
-    # Add labels and title
     fig.update_layout(
         yaxis_title="",
-        xaxis_title=dict(text='Occupancy rate', font=dict(size=30)),
-        plot_bgcolor='white',
+        xaxis_title=dict(text='Occupancy Rate', font=dict(size=30)),
+        autosize = True,
+        margin=dict(l=0, r=0, t=0 , b=0),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
     )
-    new_tick_values = ["Level 3", "Level 4", "Level 5", "Level 6", "Level 6 Chinese"]
-
-    # Adjust the font size for y-axis tick text
+    new_tick_values = ["Level 3", "Level 4", "Level 5", "Level 6", "Level 6 C"]
     fig.update_yaxes(type='category', tickmode='array', tickvals=plot1x, ticktext=new_tick_values,
-                     tickfont=dict(size=20))
-
-    # Adjust the size of the entire plot
-    fig.update_layout(height=300, width=500)  # Adjust the height and width as needed
-
-    fig.update_xaxes(tickfont=dict(size=20))
+                     tickfont=dict(size=15))
+    fig.update_xaxes(tickfont=dict(size=1))
     fig.update_traces(
         textposition='outside',
-        textfont=dict(size=24, color='black'),
+        textfont=dict(size=15, color='black'),
         marker_color=colors
     )
 
@@ -424,7 +424,7 @@ def occupancy_by_level(time, week, day):
     # Plot graph
     fig = go.Figure(data=go.Bar(x=plot1x, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=34),textfont_size=24))
     # Add labels and title
-    fig.update_layout( xaxis_title="", yaxis_title=dict(text = 'Occupancy', font=dict(size=30)),plot_bgcolor='white')
+    fig.update_layout( xaxis_title="", yaxis_title=dict(text = 'Occupancy', font=dict(size=30)),paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     new_tick_values = ["Level 3", "Level 4", "Level 5", "Level 6", "Level 6 Chinese"]
     fig.update_xaxes(type='category', tickmode='array', tickvals=plot1x, ticktext=new_tick_values,tickfont=dict(size=30))
     fig.update_yaxes(tickfont=dict(size=20))
@@ -540,6 +540,6 @@ def occupancy_level_pie(level,time,week,day):
     return fig
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5050)
+    app.run(debug = True,port=5050)
 
 

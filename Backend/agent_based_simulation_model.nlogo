@@ -186,18 +186,18 @@ end
 ; Procedure to set up floors with specific attributes
 to setup-floors
   ; Create patches for each floor and assign a floor number and max-occupancy
-  draw-floor 1 2 24 24 white "3" 344
-  draw-floor 1 28 24 24 white "4" 300
-  draw-floor 28 2 24 24 white "5" 477
-  draw-floor 28 28 24 24 white "6" 383
+  draw-floor 1 2 22 22 white "3" 344
+  draw-floor 1 28 22 22 white "4" 300
+  draw-floor 28 2 22 22 white "5" 477
+  draw-floor 28 28 22 22 white "6" 383
   draw-floor 55 18 15 15 white "6Chinese" 160
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-366
-109
-1084
-658
+495
+76
+1213
+595
 -1
 -1
 10.0
@@ -213,7 +213,7 @@ GRAPHICS-WINDOW
 0
 70
 0
-53
+50
 1
 1
 1
@@ -255,21 +255,6 @@ NIL
 1
 
 SLIDER
-28
-87
-200
-120
-share-table
-share-table
-0
-1
-0.09
-0.01
-1
-NIL
-HORIZONTAL
-
-SLIDER
 24
 142
 196
@@ -286,9 +271,9 @@ HORIZONTAL
 
 MONITOR
 30
-505
+498
 182
-550
+543
 6Chinese occupancy rate
 precision (count students with [preferred-floor = \"6Chinese\" and current-behavior != \"chope\"]/ 160) 3
 17
@@ -307,30 +292,30 @@ precision (count students with [preferred-floor = \"5\"] / 400) 3
 11
 
 CHOOSER
-24
-10
-180
-55
+23
+78
+179
+123
 week
 week
 "Normal" "Exam" "Reading" "Recess"
 0
 
 CHOOSER
-201
-11
-339
-56
+200
+79
+338
+124
 day
 day
 1 2 3 4 5 6 7
 2
 
 MONITOR
-202
-319
-306
-364
+153
+285
+257
+330
 total_occupancy
 count students with [current-behavior != \"chope\"]
 17
@@ -338,10 +323,10 @@ count students with [current-behavior != \"chope\"]
 11
 
 MONITOR
-210
-445
-301
-490
+161
+411
+252
+456
 current_time
 time:show current-time \"HH:mm\"
 17
@@ -366,10 +351,10 @@ NIL
 0
 
 PLOT
-45
-565
-325
-805
+269
+286
+480
+476
 occupancy
 time
 number-of-students
@@ -384,10 +369,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count students with [current-behavior != \"chope\"]"
 
 MONITOR
-207
-383
-301
-428
+158
+349
+252
+394
 chopped seats
 count students with [current-behavior = \"chope\"]
 17

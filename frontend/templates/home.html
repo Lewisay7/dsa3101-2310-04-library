@@ -29,7 +29,7 @@
       <p>Check your Occupancy here!</p>
 
     <!-- <form action="/get_time_level" method="POST"> -->
-      <form action="/get_time_level" method="post">
+      <form id="occupancyForm" method="post">
         <div class="timing-input">
           <select name="week" id="week">
             <option value="1">Week 1</option>
@@ -94,10 +94,11 @@
             <option value="6Chinese">Level 6 Chinese</option>
           </select>
           <button id="checkOccupancyButton" type="submit" onclick="checkOccupancy()">Check Occupancy</button>
+          <button id="OverallButton" type="submit" onclick="overall()">Check Overall</button>
         </div>
       </form>
 
-      <div id="warningMessage" class="hidden">Please enter a timing and level.</div>
+      <!-- <div id="warningMessage" class="hidden">Please enter a timing and level.</div> -->
       <br>
       <br>
       <div class="fileupload">
@@ -146,36 +147,38 @@
 
 
 
+  
   <script>
-    
     function checkOccupancy() {
-      // Get the value from the timing input field
-      const timingInput = document.getElementById("time").value;
-      const levelInput = document.getElementById("level").value;
-      const weekInput = document.getElementById("week").value;
-      const dayInput = document.getElementById("day").value;
-  
-      // Check if the input is empty
-      if (timingInput === "" || levelInput === "") {
-        const warningMessage = document.getElementById("warningMessage");
-        warningMessage.classList.remove("hidden");
-      } else {
-        const warningMessage = document.getElementById("warningMessage");
-        warningMessage.classList.add("hidden");
-  
-        // Create a form element
-        const form = document.createElement("form");
-  
-        // Set the form's action and method attributes
-        form.action = "/get_time_level";
-        form.method = "POST";
-  
-        // Append the form to the document body (you can append it to a specific location if needed)
-        document.body.appendChild(form);
-  
-        // Programmatically submit the form
-        form.submit();
-      }
+        submitForm("/get_time_level");
+    }
+
+    function overall() {
+        submitForm("/get_time_overall");
+    }
+
+    function submitForm(action) {
+        // Get the form and set its action attribute
+        const form = document.getElementById("occupancyForm");
+        form.action = action;
+
+        // Get the value from the timing input fields
+        const timingInput = document.getElementById("time").value;
+        const levelInput = document.getElementById("level").value;
+        const weekInput = document.getElementById("week").value;
+        const dayInput = document.getElementById("day").value;
+
+        // Check if the input is empty
+        if (timingInput === "" || levelInput === "") {
+            const warningMessage = document.getElementById("warningMessage");
+            warningMessage.classList.remove("hidden");
+        } else {
+            const warningMessage = document.getElementById("warningMessage");
+            warningMessage.classList.add("hidden");
+
+            // Programmatically submit the form
+            form.submit();
+        }
     }
   </script>
   

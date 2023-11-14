@@ -47,7 +47,7 @@ actual_seat_count = {'3':{'Discussion.Cubicles':56,
                         '6Chinese':{'Diagonal.Seats':72,
                              'Cubicle.seats':52,
                              'Windowed.Seats':36},
-                        '6C':{'Diagonal.Seats':92,
+                        '6':{'Diagonal.Seats':92,
                                     'Cubicle.seats':155,
                                     'Windowed.Seats':136}}
 
@@ -131,8 +131,9 @@ def generate_floorplan_contour_html(image_path, region, students,level,seat_name
 
     # Update layout
     fig.update_layout(
-        width=image.shape[1],
-        height=image.shape[0],
+        width=600,
+        height=400,
+        title = f"Level{level}",
         xaxis=dict(visible=False),
         yaxis=dict(visible=False),
         coloraxis_colorbar=dict(
@@ -141,12 +142,11 @@ def generate_floorplan_contour_html(image_path, region, students,level,seat_name
         ),
         template='plotly_white',
     )
-
+   
     # Add traces to the figure
     fig.add_trace(heatmap_trace)
     fig.add_trace(colorbar_trace)
     directory = os.path.abspath(os.path.join(os.getcwd(), "templates", "overall_plots"))
-    print(directory)
     fig.write_html(os.path.join(directory, f"heatmap_{level}.html"))
     
 def generate_floorplan_contour(image_path, region, students,level,seat_names,actual_seat_count):
@@ -210,8 +210,9 @@ def generate_floorplan_contour(image_path, region, students,level,seat_names,act
 
     # Update layout
     fig.update_layout(
-        width=image.shape[1],
-        height=image.shape[0],
+        width=800,
+        height=600,
+        title = f"Level{level}",
         xaxis=dict(visible=False),
         yaxis=dict(visible=False),
         coloraxis_colorbar=dict(

@@ -193,7 +193,7 @@ form#level input[type="submit"]:hover {
 
 /*styling for total number of students at floor_view html*/
 
-.occupancy_result p{
+.occupancy_result{
   margin: 0;
   color:#053F5C;
   font-size: 40px;
@@ -205,83 +205,82 @@ form#level input[type="submit"]:hover {
   
 }
 
+/* Widget styles */
+.widget-row {
+  display: flex;
+  gap: 20px;
+  height : 350px;
+}
+
+.widget {
+  padding: 10px 10px;
+  flex: 1; /* Adjust the flex property */
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+.widget iframe {
+  margin: 0; /* Remove margin */
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box; /* Include padding in the total width */
+}
+
+#occupancyByLevelWidget {
+  flex: 2; /* Adjust the flex property for the second widget */
+}
+
+#rateByLevelWidget {
+  flex: 2; /* Adjust the flex property for the third widget */
+}
+
+/* Adjust the size of the first widget */
+#totalOccupancyWidget {
+  flex: 1;
+}
+
 /*heatmaps plots*/
 .heatmaps {
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 20px; /* Added margin to separate from the form */
-  }
-  
-  .row {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap; /* Allow images to wrap to the next line */
-  }
-  
-  .col {
-    flex: 1;
-    margin: 10px;
-    text-align: center; /* Center the images within the columns */
-    position: relative; /* Position relative for absolute positioning of span */
-  }
-  
-  .col img {
-    max-width: 100%; /* Ensure images don't exceed the width of their container */
-    width: 400px;
-    height: auto; /* Maintain aspect ratio */
-    padding: 30px;
-  }
-  
-  .col span {
-    position: absolute;
-    top: -10px; /* Position the span at the top of the container */
-    left: 50%; /* Center the span horizontally */
-    transform: translateX(-50%); /* Center the span precisely */
-    font-size: 25px; /* Adjust font size as needed */
-    color: #fff; /* Set text color */
-    background-color: #404d82; /* Add a semi-transparent background for better readability */
-    padding: 5px; /* Add padding for better visual appearance */
-    white-space: nowrap; /* Prevent text from wrapping */
-    margin-top: 0;
-    border-radius: 5px;
-  }
+  justify-content: center;
+  margin-top: 20px;
+}
 
-  .barplot {
-    width: 800px; /* Set a fixed width for the container */
-    margin: 0 auto; /* Center the container horizontally */
-    display: flex;
-    flex-wrap: wrap; /* Allow images to wrap to the next line */
-    align-items: center;
-    position: relative; /* Position relative for absolute positioning of span */
-  }
-  
-  .barplot img {
-    max-width: 100%; /* Ensure images don't exceed the width of their container */
-    width: 100%;
-    height: auto; /* Maintain aspect ratio */
-    padding: 20px;
-  }
-  
-  .barplot span {
-    position: absolute;
-    top: -20px; 
-    left: 50%; 
-    transform: translateX(-50%); 
-    font-size: 25px; 
-    color: #ffffff; 
-    background-color:  #404d82; 
-    padding: 5px; 
-    white-space: nowrap; 
-    margin-top: 0;
-    border-radius: 5px;
-  }
+.heatmap-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.heatmap {
+  width :600px;
+  height :400px;
+  box-sizing: border-box; /* Include padding in the total width */
+  overflow: hidden; /* Hide content that exceeds the box */
+}
+
+.heatmap iframe {
+  width: 100%;
+  height: 100%;
+  border: none; /* Remove border from iframe */
+}
+
   
   @media (max-width: 768px) {
     .col img {
         width: 200px;
       }
     
-    .barplot {
-    width: 500px; /* Set a fixed width for the container */
+    .bar-plot {
+        width: 100%;
+        height: 100%;
     }
-  }
+    .heatmap-row {
+    justify-content: center;
+
+    flex-direction: column;
+    }
+
+    .heatmap {
+      margin-bottom: 20px;
+    }
+}

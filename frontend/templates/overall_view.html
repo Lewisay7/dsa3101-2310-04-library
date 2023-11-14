@@ -79,7 +79,7 @@
               <option value="23">11 PM</option>
               <option value="24">12 AM</option>
             </select>
-            <button type="submit">Check Overall</button>
+            <button id="OverallButton" type="submit" onclick="overall()">Check Overall</button>
           </div>
         </form>
         <div class = "occupancy_result">
@@ -88,20 +88,41 @@
             <span class = "number">{{ total_occupancy }} </span>
           </p>
         </div>
+        <div class="widget-row">
+          <div id="totalOccupancyWidget" class="widget">
+            <p>Occupancy rate<br>
+              is {{ total_rate }}%
+            </p>
+          </div>
+          <div id="occupancyByLevelWidget" class="widget">
+            <iframe class="bar-plot" src="./overall_plots/occupancy_by_level.html" frameborder="0"></iframe>
+          </div>
+          <div id="rateByLevelWidget" class="widget">
+            <iframe class="bar-plot" src="./overall_plots/rate_by_level.html" frameborder="0"></iframe>
+          </div>
+        </div>
+        
         <div class="heatmaps">
-          <div class="row">
-              <div class="col"><img src="./overall_plots/heatmap_3.html" alt="Level 3"><span>Level 3 :</span></div>
-              <div class="col"><img src="./overall_plots/heatmap_4.html" alt="Level 4"><span>Level 4 : 178</span></div>
-              <div class="col"><img src="./overall_plots/heatmap_5.html" alt="Level 5"><span>Level 5 : 117</span></div> 
+          <div class="heatmap-row" style = "display : flex;">
+              <div class="heatmap">
+                <iframe src="./overall_plots/heatmap_3.html" frameborder="0"></iframe>
+              </div>
+              <div class="heatmap">
+                <iframe src="./overall_plots/heatmap_4.html" frameborder="0"></iframe>
+              </div>
           </div>
-          <div class="row" style="display: flex;">
-            <iframe src="./overall_plots/heatmap_6.html" width="50%" height="600px" frameborder="0"></iframe>
-            <iframe src="./overall_plots/heatmap_6Chinese.html" width="50%" height="600px" frameborder="0"></iframe>
-            <iframe src="./overall_plots/occupancy_by_level.html" width="50%" height="600px" frameborder="0"></iframe>
+          <div class="heatmap-row" style="display: flex;">
+            <div class="heatmap">
+              <iframe src="./overall_plots/heatmap_5.html" frameborder="0"></iframe>
+            </div>
+            <div class = "heatmap">
+              <iframe src="./overall_plots/heatmap_6.html" width="100%" height="600px" frameborder="0"></iframe>
+            </div>
           </div>
-          <div class="barplot">
-          </div>
-          <div id="tester" style="width:90%;height:250px;">
+          <div class="heatmap-row" style="display: flex;">
+            <div class = "heatmap">
+              <iframe src="./overall_plots/heatmap_6Chinese.html" width="100%" height="600px" frameborder="0"></iframe>
+            </div>
           </div>
         </div> 
   
@@ -127,6 +148,34 @@
       </footer>
 
       <script>
+    
+        function overall() {
+            submitForm("/get_time_overall");
+        }
+    
+        function submitForm(action) {
+            // Get the form and set its action attribute
+            const form = document.getElementById("occupancyForm");
+            form.action = action;
+    
+            // Get the value from the timing input fields
+            const timingInput = document.getElementById("time").value;
+            const levelInput = document.getElementById("level").value;
+            const weekInput = document.getElementById("week").value;
+            const dayInput = document.getElementById("day").value;
+    
+            // Check if the input is empty
+            if (timingInput === "" || levelInput === "") {
+                const warningMessage = document.getElementById("warningMessage");
+                warningMessage.classList.remove("hidden");
+            } else {
+                const warningMessage = document.getElementById("warningMessage");
+                warningMessage.classList.add("hidden");
+    
+                // Programmatically submit the form
+                form.submit();
+            }
+        }
       </script>
 </body>
 </html>

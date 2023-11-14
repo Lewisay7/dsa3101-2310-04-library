@@ -144,9 +144,9 @@ dash_app.layout = html.Div([
 
         # Graphs
         html.Div([
-            dcc.Graph(id='occupancy-by-time', style={'width': '30%', 'height': '450px', 'border': '4px solid black', 'margin-right': '15px'}),
-            dcc.Graph(id='occupancy-by-level', style={'width': '30%', 'height': '450px', 'border': '4px solid black', 'margin-right': '15px'}),
-            dcc.Graph(id='occupancy-by-seat', style={'width': '30%', 'height': '450px', 'border': '4px solid black'}),
+            dcc.Graph(id='occupancy-by-time', style={'width': '30%', 'height': '400px', 'border': '4px solid black', 'margin-right': '15px'}),
+            dcc.Graph(id='occupancy-by-level', style={'width': '30%', 'height': '400px', 'border': '4px solid black', 'margin-right': '15px'}),
+            dcc.Graph(id='occupancy-by-seat', style={'width': '30%', 'height': '400px', 'border': '4px solid black'}),
         ], style={'width': '85%', 'display': 'flex', 'flex-wrap': 'wrap'}),  # Graphs with flex wrap to handle responsive layout
     ], style={'display': 'flex', 'margin-bottom': '60px'}),
 
@@ -155,7 +155,7 @@ dash_app.layout = html.Div([
         # Graphs with spacing
         html.Div([
             dcc.Graph(id='occupancy-by-level-pie', style={'width': '30%', 'height': '400px', 'margin-right': '60px'}),
-            dcc.Graph(id='heatmap', style={'width': '30%', 'height': '600px'}),
+            dcc.Graph(id='heatmap', style={'width': '70%', 'height': '600px', 'border': '4px solid black'}),
         ], style={'display': 'flex', 'margin-bottom': '30px'}),
     ]),
 ])
@@ -393,19 +393,19 @@ def occupancy_by_time(level, time, week, day):
         else:
             col.append("black")
 
+    max_y_axis = max(plot1y)*1.2
     # Plot graph
-    fig = go.Figure(data=go.Bar(x=plot1x, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=34),textfont_size=24))
+    fig = go.Figure(data=go.Bar(x=plot1x, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=20),textfont_size=24))
     # Add labels and title
-    fig.update_layout( xaxis_title="", yaxis_title=dict(text = 'Occupancy', font=dict(size=30)),plot_bgcolor='white')
+    fig.update_layout( xaxis_title="", yaxis_title="", title=dict(text = "<b>"+'Occupancy over Time'+"</b>", font=dict(size=20,)), title_x = 0.5,plot_bgcolor='white',margin=dict(t=50) )
     new_tick_values = ["9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm", "9pm"]
-    fig.update_xaxes(type='category', tickmode='array', tickvals=plot1x, ticktext=new_tick_values,tickfont=dict(size=30))
-    fig.update_yaxes(tickfont=dict(size=20))
+    fig.update_xaxes(type='category', tickmode='array', tickvals=plot1x, ticktext=new_tick_values,tickfont=dict(size=15))
+    fig.update_yaxes(tickfont=dict(size=15), range = [0, max_y_axis])
     fig.update_traces(
     textposition='outside',  
     textfont=dict(size=24, color='black')
     ,marker_color=col)
 
-    fig.write_html("templates/occupancy_by_time.html")
     return fig
 
 # Generate a barplot of Occupancy by Level
@@ -422,19 +422,19 @@ def occupancy_by_level(time, week, day):
         fil = calculate_total_occupancy(df, x, time, week,day)
         plot1y.append(fil)
 
+    max_y_axis = max(plot1y)*1.2
     # Plot graph
-    fig = go.Figure(data=go.Bar(x=plot1x, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=34),textfont_size=24))
+    fig = go.Figure(data=go.Bar(x=plot1x, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=20),textfont_size=24))
     # Add labels and title
-    fig.update_layout( xaxis_title="", yaxis_title=dict(text = 'Occupancy', font=dict(size=30)),paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-    new_tick_values = ["Level 3", "Level 4", "Level 5", "Level 6", "Level 6 Chinese"]
-    fig.update_xaxes(type='category', tickmode='array', tickvals=plot1x, ticktext=new_tick_values,tickfont=dict(size=30))
-    fig.update_yaxes(tickfont=dict(size=20))
+    fig.update_layout( xaxis_title="", yaxis_title="", title=dict(text = "<b>"+'Occupancy in each Level'+"</b>", font=dict(size=20,)), title_x = 0.5,plot_bgcolor='white',margin=dict(t=50,b=10) )
+    new_tick_values = ["Level 3", "Level 4", "Level 5", "Level 6", "Chinese"]
+    fig.update_xaxes(type='category', tickmode='array', tickvals=plot1x, ticktext=new_tick_values,tickfont=dict(size=15))
+    fig.update_yaxes(tickfont=dict(size=15), range = [0, max_y_axis])
     fig.update_traces(
     textposition='outside',  
-    textfont=dict(size=24, color='black')
+    textfont=dict(size=15, color='black')
     ,marker_color=colors)
 
-    fig.write_html("templates/occupancy_by_level.html")
     return fig
 
 # Generate a barplot of Occupancy by seats at a specific level
@@ -454,7 +454,7 @@ def occupancy_by_seat(level, time, week, day):
 
     #Give nicer names to current seat types
     seat_names = {"Discussion.Cubicles": "Discussion Cubicles", "Soft.seats" : "Soft Seats", "Moveable.seats": "Moveable Seats",
-                  "Sofa":"Sofa","Windowed.Seats":"Windowed Seats","X4.man.tables":"4 Man Tables","X8.man.tables":"8 Man Tables",
+                  "Sofa":"Sofa","Windowed.Seats":"Windowed Seats","X4.man.tables":"4M Tables","X8.man.tables":"8M Tables",
                   "Diagonal.Seats": "Diagonal Seats","Cubicle.seats":"Cubicle Seats"}
     
     #Find occupancy by seat types
@@ -466,19 +466,19 @@ def occupancy_by_seat(level, time, week, day):
         #Retrieve nicer name format from dictionary
         x_names.append(seat_names.get(i))
 
+    max_y_axis = max(plot1y)*1.2
     # Plot graph
-    fig = go.Figure(data=go.Bar(x=seat_filter, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=34),textfont_size=24))
+    fig = go.Figure(data=go.Bar(x=seat_filter, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=20),textfont_size=24))
     # Add labels and title
-    fig.update_layout( xaxis_title="", yaxis_title=dict(text = 'Occupancy', font=dict(size=30)),plot_bgcolor='white')
+    fig.update_layout( xaxis_title="", yaxis_title="", title=dict(text = "<b>"+'Occupancy by Seat Type'+"</b>", font=dict(size=20,)), title_x = 0.5,plot_bgcolor='white',margin=dict(t=50,b=0) )
     new_tick_values = x_names
-    fig.update_xaxes(type='category', tickmode='array', tickvals=seat_filter, ticktext=new_tick_values,tickfont=dict(size=30))
-    fig.update_yaxes(tickfont=dict(size=20))
+    fig.update_xaxes(type='category', tickmode='array', tickvals=seat_filter, ticktext=new_tick_values,tickfont=dict(size=15))
+    fig.update_yaxes(tickfont=dict(size=15), range = [0, max_y_axis])
     fig.update_traces(
     textposition='outside',  
-    textfont=dict(size=24, color='black')
+    textfont=dict(size=15, color='black')
     ,marker_color=colors)
 
-    fig.write_html("templates/occupancy_by_seat.html")
     return fig
 
 def occupancy_by_level_pie(time,week,day):
@@ -514,29 +514,40 @@ def occupancy_by_level_pie(time,week,day):
     for i, (labels, values) in enumerate(zip(label_list, plot1y), start=1):
         fig.add_trace(go.Pie(labels=labels, values=values), 1, i)
 
-    # Update layout
-    fig.update_layout(title_text="Hihi")
-
     return fig
 
 
 # Create pie chart for single floor
-def occupancy_level_pie(level,time,week,day):
-
+def occupancy_level_pie(level, time, week, day):
     max_seat = pd.read_csv('datasets/actual_seat_count.csv')
+    
     # Calculate the total occupancy for the filtered data
-    # Get Occupancy by level 
-    fil = calculate_total_occupancy(df, level, time, week,day)
+    fil = calculate_total_occupancy(df, level, time, week, day)
     filtered_seat = max_seat[(df['level'] == level)]
     occupancy = filtered_seat['count'].sum()
-    non_occupied = occupancy-fil
-    occupied_vs_non = [fil,non_occupied]
+    non_occupied = occupancy - fil
+    occupied_vs_non = [fil, non_occupied]
     vslabels = ["Occupied", "Not Occupied"]
 
-    fig = go.Figure(data=[go.Pie(labels=vslabels, values=occupied_vs_non)])
-    fig.update_layout(title_text="Occupied vs Not Occupied", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-    # Update layout
-    fig.update_layout(title_text="Occupancy")
+    # Choose a color palette
+    colors = ["red", 'blue']
+
+    fig = go.Figure(data=[go.Pie(labels=vslabels, values=occupied_vs_non, marker=dict(colors=colors))])
+
+    # Customize layout
+    fig.update_layout(
+        title=dict(text = "<b>Total Floor Occupancy: </b>" + "<b>"+str(fil)+"</b>", font=dict(size=20,)),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        title_x = 0.5
+    )
+
+    # Customize text information on the chart
+    fig.update_traces(
+        textinfo='percent+label',  # Display percentage and label
+        textposition='inside',  # Place text inside the pie
+        showlegend = False
+    )
 
     return fig
 

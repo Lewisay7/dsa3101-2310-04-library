@@ -148,34 +148,6 @@
       </footer>
 
       <script>
-    
-        function overall() {
-            submitForm("/get_time_overall");
-        }
-    
-        function submitForm(action) {
-            // Get the form and set its action attribute
-            const form = document.getElementById("occupancyForm");
-            form.action = action;
-    
-            // Get the value from the timing input fields
-            const timingInput = document.getElementById("time").value;
-            const levelInput = document.getElementById("level").value;
-            const weekInput = document.getElementById("week").value;
-            const dayInput = document.getElementById("day").value;
-    
-            // Check if the input is empty
-            if (timingInput === "" || levelInput === "") {
-                const warningMessage = document.getElementById("warningMessage");
-                warningMessage.classList.remove("hidden");
-            } else {
-                const warningMessage = document.getElementById("warningMessage");
-                warningMessage.classList.add("hidden");
-    
-                // Programmatically submit the form
-                form.submit();
-            }
-        }
       </script>
 </body>
 </html>

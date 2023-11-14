@@ -13,7 +13,7 @@ def basic_cleaning(df: pd.DataFrame):
     df[['Date','Time']] = df.Datetime.str.split(" ", expand = True)
     df['Time'] = df['Time'].apply(lambda x: x.replace('+08:00','')) 
 
-    df.dropna(subset = ['User Number'], inplace = True)
+    df.dropna(subset = ['User Number','Broad Category'], inplace = True)
     df = df[-df['Broad Category'].isin(['Administrative Staff','Complimentary','Corporate Card',
                                         'External Members', 'External Members/Alumni', 'Non-Academic Staff',
                                         'Research Staff', 'Teaching Staff', 'Library Professional']) == True]
@@ -40,16 +40,16 @@ def get_outlier_records(df: pd.DataFrame):
                     current_date = row["Date"]
                 else:
                     if row['Date'] != current_date:
-                        outlier = outlier.append(df.iloc[index-1])
-                        outlier = outlier.append(df.iloc[index])
+                        outlier = pd.concat([outlier, df.iloc[index-1:index]])
+                        outlier = pd.concat([outlier, df.iloc[index:index+1]])
                 prev = row['Direction']
             else:
-                outlier = outlier.append(df.iloc[index])
+                outlier = pd.concat([outlier, df.iloc[index:index+1]])
         else:
             if row['Direction'] != "Entry":
-                outlier = outlier.append(df.iloc[index])
+                outlier = pd.concat([outlier, df.iloc[index:index+1]])
                 if prev == "Entry":
-                    outlier = outlier.append(df.iloc[index-1])
+                    outlier = pd.concat([outlier, df.iloc[index-1:index]])
             else:
                 current_date = row["Date"]
                 current_user = row['User Number']
@@ -70,15 +70,15 @@ def fix_outlier_records(outlier: pd.DataFrame):
     outlier_solution = pd.DataFrame()
     for index, row in outlier.iterrows():
         if row["Direction"] == 'Entry':
-            new_row = row.to_dict()
+            new_row = row.to_frame().transpose()
             new_row['Direction'] = 'Exit'
             new_row['Time'] = CLB_CLOSING
-            outlier_solution = outlier_solution.append(new_row, ignore_index = True)
+            outlier_solution = pd.concat([outlier_solution, new_row], ignore_index=True)
         else:
-            new_row = row.to_dict()
+            new_row = row.to_frame().transpose()
             new_row['Direction'] = 'Entry'
             new_row['Time'] = CLB_OPENING
-            outlier_solution = outlier_solution.append(new_row, ignore_index = True)
+            outlier_solution = pd.concat([outlier_solution, new_row], ignore_index=True)
     return outlier_solution
 
 #---For entry/exit labels---
@@ -96,19 +96,19 @@ def assign_entry_exit(data: pd.DataFrame):
     is_entry = True
     solution = pd.DataFrame()
     for index, row in data.iterrows():
-        if row["User Number"] == current_user:
-            new_row = row.to_dict()   
+        if (row["User Number"] == current_user).any():
+            new_row = row.to_frame().transpose()  
             if is_entry == True:
                 new_row['Direction'] = 'Entry'
                 is_entry = False
             else:
                 new_row['Direction'] = 'Exit'
                 is_entry = True
-            solution = solution.append(new_row, ignore_index = True)
+            solution = pd.concat([solution, new_row], ignore_index=True)
         else:
-            new_row = row.to_dict()
+            new_row = row.to_frame().transpose()
             new_row['Direction'] = 'Entry'
-            solution = solution.append(new_row, ignore_index = True)
+            solution = pd.concat([solution, new_row], ignore_index=True)
             is_entry = False
             current_user = new_row['User Number']
     return solution
@@ -129,16 +129,16 @@ def get_outlier_records_random(data: pd.DataFrame):
     for index, row in data.iterrows():
         if row['Direction'] == 'Entry':
             if before != 'exit':
-                outlier = outlier.append(data.iloc[index-1])
+                outlier = pd.concat([outlier, data.iloc[index-1:index]])
             current_time = datetime.strptime(str(row['Datetime']), '%Y-%m-%d %H:%M:%S') 
             before = 'entry'
         else:
             if (datetime.strptime(str(row['Datetime']), '%Y-%m-%d %H:%M:%S') - current_time).total_seconds() > MAX_SECONDS_IN_LIBRARY:
-                outlier = outlier.append(data.iloc[index-1])
-                outlier = outlier.append(data.iloc[index])
+                outlier = pd.concat([outlier, data.iloc[index-1:index]])
+                outlier = pd.concat([outlier, data.iloc[index:index+1]])
             before = 'exit'
     if data.iloc[-1]['Direction'] == "Entry": #if last row is entry so must add in exit for it
-        outlier = outlier.append(data.iloc[-1])
+        outlier = pd.concat([outlier, data.iloc[-1:]])
     return outlier
 
 def fix_outlier_random(outlier: pd.DataFrame):
@@ -155,15 +155,15 @@ def fix_outlier_random(outlier: pd.DataFrame):
     outlier_solution = pd.DataFrame()
     for index, row in outlier.iterrows():
         if row["Direction"] == 'Entry':
-            new_row = row.to_dict()
+            new_row = row.to_frame().transpose()
             new_row['Direction'] = 'Exit'
             new_row['Datetime'] = datetime.strptime(str(row['Datetime']), '%Y-%m-%d %H:%M:%S') + timedelta(hours=12)
-            outlier_solution = outlier_solution.append(new_row, ignore_index = True)
+            outlier_solution = pd.concat([outlier_solution, new_row], ignore_index=True)
         else:
-            new_row = row.to_dict()
+            new_row = row.to_frame().transpose()
             new_row['Direction'] = 'Entry'
             new_row['Datetime'] = datetime.strptime(str(row['Datetime']), '%Y-%m-%d %H:%M:%S') - timedelta(hours=12)
-            outlier_solution = outlier_solution.append(new_row, ignore_index = True)
+            outlier_solution = pd.concat([outlier_solution, new_row], ignore_index=True)
     output = pd.concat([outlier, outlier_solution]).reset_index(drop=True)
     output['Datetime'] = output['Datetime'].astype(str)
     output[['Date','Time']] = output.Datetime.str.split(" ", expand = True)

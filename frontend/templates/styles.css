@@ -1,0 +1,370 @@
+@import url('https://fonts.googleapis.com/css2?family=Sriracha&display=swap');
+
+body {
+      margin: 0;
+      box-sizing: border-box;
+}
+
+  .header {
+      display: flex;
+      justify-content: left; 
+      align-items: center;
+      height :60px;
+      background-color: #ffffff;
+  }
+
+  .header img {
+        width: 40px;
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        margin-right: 1025px; 
+  }
+
+  .header .logo {
+    font-size: 25px;
+    font-family: 'Sriracha', cursive;
+    color: #000;
+    text-decoration: none;
+    margin: 0 10px;
+  }
+  
+  .nav-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #ffffff;
+    padding-left: 50px;
+  }
+
+  .nav-items a {
+    text-decoration: none;
+    color: #000;
+    padding: 20px 20px;
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    height: 800px;
+    /* background: url("https://img.freepik.com/premium-vector/gradient-modern-design-abstract-background-color_103282-920.jpg"); */
+    background : linear-gradient(to bottom, rgba(185, 175, 175, 0.1) 0%, rgba(243, 223, 223, 0.3) 100%), url("https://img.freepik.com/premium-vector/gradient-modern-design-abstract-background-color_103282-920.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .intro h1 {
+    font-family: sans-serif;
+    font-size: 90px;
+    color: #053F5C;
+    font-weight: bold;
+    text-transform:uppercase;
+    margin: 0;
+  }
+
+  .intro p {
+    font-family: sans-serif;
+    font-size: 30px;
+    color: #429ebd;
+    text-transform: none;
+    margin: 20px 0;
+  }
+
+  /* CSS for timing input */
+  .timing-input {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0;
+  }
+
+  .timing-input input {
+      padding: 10px;
+      font-size: 16px;
+      margin: 0 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+  }
+
+  .timing-input button {
+      background-color: #5edaf0;
+      color: #000;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 5px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.4);
+      margin: 0 10px;
+  }
+
+  /* CSS for dropdown select */
+  .timing-input select {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin: 0 10px;
+  }
+#warningMessage {
+  color :#053F5C;
+  font-family: sans-serif;
+  font-size: 16px;
+}
+  /* Style the file upload container */
+.fileupload {
+  display: inline-block;
+  flex-direction: column;
+  background-color: #f4f4f4;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  height: 10vh; 
+  width: 23%; 
+  text-align: center;
+  margin: 0px 20px;
+  
+  }
+  
+  .fileupload h1 {
+  font-size: 20px;
+  color: #333333;
+  margin: 0;
+  text-transform: uppercase;
+  }
+  
+  /* Style the file input and submit button */
+  .fileupload input[type="file"] {
+  margin: 0;
+  font-size: 15px;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  background: #ffffff; /* White background */
+  color: #000;
+  }
+  
+  .fileupload input[type="submit"] {
+  background-color: #5edaf0;
+  color: #000;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.4);
+  }
+  
+  /* Style the submit button on hover */
+  .fileupload input[type="submit"]:hover {
+  background-color: #2676b7;
+  }
+  
+
+  .about-clb {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    padding: 40px 80px;
+    border-top: 2px solid #eeeeee;
+  }
+
+  .about-clb img {
+    width: 500px;
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+
+  .about-clb-text h2 {
+    font-size: 40px;
+    color: #333333;
+    text-transform: uppercase;
+    margin: 10px ;
+  }
+
+  .about-clb-text p {
+    font-size: 16px;
+    color: #585858;
+    margin: 10px ;
+    padding: 5px 20px 0px 0px;
+  }
+
+  /* CSS for footer */
+  .footer {
+    margin:0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 100px;
+    background-color: #429EBD;
+    padding: 70px 0;
+  }
+
+  .footer .copy {
+    padding : 20px;
+    color: #faf8f8;
+  }
+
+  .bottom-links {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 40px 0;
+  }
+
+  .bottom-links .links {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 40px;
+  }
+
+  .bottom-links .links span {
+    font-size: 20px;
+    color: #fff;
+    text-transform: uppercase;
+    margin: 10px 50px;
+  }
+
+  .bottom-links .links a {
+    text-decoration: none;
+    color: #ffffff;
+    padding: 10px 20px;
+  }
+
+  /* Style the entire form container */
+form#level {
+  margin: 0 auto;
+  width: 50%;
+  background:#b2b1d0;
+  color: #000;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Style the select dropdown */
+form#level select#selectValue {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 2px solid #0c1216;
+  border-radius: 5px;
+  outline: none;
+  background: #ffffff; /* Semi-transparent white background */
+  color: #000;
+}
+
+/* Style the dropdown options */
+form#level select#selectValue option {
+  background: #3498db;
+  color: #fff;
+}
+
+/* Style the submit button */
+form#level input[type="submit"] {
+  background-color: rgb(242, 242, 121);
+  color: #302f49;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Style the submit button on hover */
+form#level input[type="submit"]:hover {
+  background-color: #2676b7;
+}
+
+/* Style the file upload container */
+.fileupload {
+display: flex;
+flex-direction: column;
+padding: 5px;
+background-color: #f4f4f4;
+border: 2px solid #e0e0e0;
+border-radius: 10px;
+box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+height: 10vh; 
+width: 23%; 
+text-align: center;
+
+}
+
+.fileupload h1 {
+font-size: 20px;
+color: #333333;
+margin: 0;
+text-transform: none
+}
+
+/* Style the file input and submit button */
+.fileupload input[type="file"] {
+margin: 0;
+font-size: 15px;
+padding: 10px;
+border: 2px solid #ccc;
+border-radius: 5px;
+outline: none;
+background: #ffffff; /* White background */
+color: #000;
+}
+
+.fileupload input[type="submit"] {
+background-color: #5edaf0;
+color: #000;
+padding: 10px 25px;
+border: none;
+border-radius: 5px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.4);
+}
+
+/* Style the submit button on hover */
+.fileupload input[type="submit"]:hover {
+background-color: #2676b7;
+}
+
+/*styling for total number of students at floor_view html*/
+
+.occupancy_result{
+  margin: 0;
+  color : #2676b7;
+
+}
+
+.number {
+  color: rgb(244, 22, 22);
+  
+}
+
+/*heatmaps plots*/
+.heatmaps {
+  display: flex;
+  flex-wrap: wrap;
+}
+.row {
+  width: 100%;
+  display: flex;
+}
+.col {
+  flex: 1;
+  margin: 10px;
+  size: 30px;
+}
+.col img{
+ width: 400px;
+}

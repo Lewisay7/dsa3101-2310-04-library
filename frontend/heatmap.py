@@ -9,6 +9,7 @@ from PIL import Image
 import base64
 import concurrent.futures
 import cv2
+import os
 
 images_path = {'3': "floorplan_images/L3_grayscale_downsized.jpg",
                '4':"floorplan_images/L4_grayscale_downsized.jpg",
@@ -144,7 +145,9 @@ def generate_floorplan_contour_html(image_path, region, students,level,seat_name
     # Add traces to the figure
     fig.add_trace(heatmap_trace)
     fig.add_trace(colorbar_trace)
-    fig.write_html(f"heatmap{level}.html")
+    directory = os.path.abspath(os.path.join(os.getcwd(), "templates", "overall_plots"))
+    print(directory)
+    fig.write_html(os.path.join(directory, f"heatmap_{level}.html"))
     
 def generate_floorplan_contour(image_path, region, students,level,seat_names,actual_seat_count):
     # Load the floorplan image and convert to data URI

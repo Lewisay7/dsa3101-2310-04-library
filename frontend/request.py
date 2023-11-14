@@ -162,7 +162,7 @@ def occupancy_by_level(time, week, day):
     textfont=dict(size=24, color='black')
     ,marker_color=colors)
 
-    fig.write_html("./templates/plots/occupancy_by_level.html")
+    fig.write_html("./templates/overall_plots/occupancy_by_level.html")
 
 # Generate heatmaps of all level
 def generate_heatmap(level, week, hour, day):

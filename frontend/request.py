@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.ticker import MaxNLocator
@@ -8,6 +9,7 @@ import plotly.graph_objects as go
 import numpy as np
 import cv2
 from heatmap import generate_floorplan_contour
+import shutil   
 
 
 images_path = {'3': "floorplan_images/L3_grayscale_downsized.jpg",
@@ -248,6 +250,59 @@ def occupancy_by_seat(level, time, week, day):
 
     fig.write_html("templates/occupancy_by_seat.html")
     #fig.show()
+
+
+def is_valid_file(file_path):
+    try:
+        df = pd.read_csv(file_path)
+        return len(df.columns) == 6 
+    except Exception:
+        return False
+    
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    result = ''
+    result_class = ''
+    file_path = None
+
+    if 'file' not in request.files:
+        result = "No file part"
+        result_class = "failed"
+    else:
+        file = request.files['file']
+        if file.filename == '':
+            result = "No selected file"
+            result_class = "failed"
+        else:
+            # Generate a temporary file path
+            temp_file_path = os.path.join("datasets", "uploaded_file.csv")
+            file.save(temp_file_path)
+
+            if is_valid_file(temp_file_path):
+                # If the uploaded file has the expected format, move it to the final file path
+                file_path = os.path.join("datasets", "dsa_data.csv")
+                file_path_back = os.path.join("Backend/datasets","dsa_data.csv")
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                if os.path.exists(file_path_back):
+                    os.remove(file_path_back)
+                
+                os.rename(temp_file_path, file_path)
+                shutil.copy(file_path, file_path_back)
+
+                result = "File uploaded and saved as dsa_data.csv"
+                result_class = "uploaded"
+            else:
+                result = "Uploaded file does not have 7 columns"
+                result_class = "failed"
+
+            # Remove the temporary file
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+
+    return render_template('upload.html', result=result, result_class=result_class)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, port= 5050)

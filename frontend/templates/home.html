@@ -6,17 +6,16 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LibSpace</title>
-  <script src="https://kit.fontawesome.com/53d0e98b35.js" crossorigin="anonymous"></script>
+  <script src="../libspace_logo.png" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
 
 </head>
-
 <body>
   <header class="header">
     <a href="https://nus.edu.sg/nuslibraries/spaces/our-libraries/central-library" class="logo"> NUS
     </a>
-    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b9/NUS_coat_of_arms.svg/1280px-NUS_coat_of_arms.svg.png" alt="me">
+    <img src="../libspace_logo.png" alt="me">
     <nav class="nav-items">
       <a href="#">Home</a>
       <a href="#about-section">About</a>
@@ -97,17 +96,18 @@
           <button id="OverallButton" type="submit" onclick="overall()">Check Overall</button>
         </div>
       </form>
-
-      <!-- <div id="warningMessage" class="hidden">Please enter a timing and level.</div> -->
       <br>
       <br>
       <div class="fileupload">
         <h1>Upload a CSV or Excel file:</h1>
         <form action="/upload" method="POST" enctype="multipart/form-data">
-            <input type="file" name="file" accept=".csv, .xls, .xlsx">
+            <input type="file" name="file" id="file-input" accept=".csv, .xls, .xlsx">
+            <button type="button" id="remove-file">Remove File</button>
             <input type="submit" value="Upload and Convert">
+            
         </form>
-      </div>
+    </div>
+    
 
     </div>
 
@@ -180,6 +180,11 @@
             form.submit();
         }
     }
+
+  document.getElementById('remove-file').addEventListener('click', function () {
+        document.getElementById('file-input').value = '';
+    });
+
   </script>
   
 </body>

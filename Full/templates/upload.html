@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 20px auto;
+            transition: background-color 0.2s;
+        }
+
+        p.uploaded {
+            background-color: #8bc34a; /* Green background for "File uploaded" */
+            color: #fff;
+        }
+
+        p.failed {
+            background-color: #f44336; /* Red background for "Upload failed" */
+            color: #fff;
+        }
+
+        a {
+            text-decoration: none;
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        a:hover {
+            background-color: #2676b7;
+        }
+    </style>
+</head>
+<body>
+    <h1>File Upload Result</h1>
+    <p class="{{ result_class }}">{{ result }}</p>
+
+    <a href="home.html">Back to Home</a>
+</body>
+</html>

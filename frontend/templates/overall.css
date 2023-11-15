@@ -248,10 +248,12 @@ form#level input[type="submit"]:hover {
 
 #occupancyByLevelWidget {
   flex: 2; /* Adjust the flex property for the second widget */
+  border: 2px solid black;
 }
 
 #rateByLevelWidget {
   flex: 2; /* Adjust the flex property for the third widget */
+  border: 2px solid black;
 }
 
 
@@ -271,21 +273,18 @@ form#level input[type="submit"]:hover {
 }
 
 .heatmap {
-  width :800px;
-  height :500px;
-  box-sizing: border-box; /* Include padding in the total width */
-  overflow: hidden; /* Hide content that exceeds the box */
-  align-items: center;
+  width: 700px;
+  height: 450px;
 }
 
+/* Heatmap iframe */
 .heatmap iframe {
   width: 100%;
   height: 100%;
-  border: none; /* Remove border from iframe */
 }
 
   
-  @media (max-width: 768px) {
+  @media (max-width: 700px) {
     .col img {
         width: 200px;
       }

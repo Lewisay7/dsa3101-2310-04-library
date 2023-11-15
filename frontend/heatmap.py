@@ -128,8 +128,6 @@ def generate_floorplan_contour_html(image_path, region, students,level,seat_name
 
     # Update layout
     fig.update_layout(
-        width=600,
-        height=400,
         title=f"Level{level}",
         xaxis=dict(visible=False),
         yaxis=dict(visible=False),

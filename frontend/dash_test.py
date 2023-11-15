@@ -90,6 +90,7 @@ dash_app.layout = html.Div([
                 ],
                 value="3",
                 multi=False,
+                clearable=False,
                 style={'width': '100%', 'margin-bottom': '10px'}
             ),
             dcc.Dropdown(
@@ -114,15 +115,7 @@ dash_app.layout = html.Div([
                 ],
                 value="1",
                 multi=False,
-                style={'width': '100%', 'margin-bottom': '10px'}
-            ),
-            dcc.Dropdown(
-                id='hour-dropdown',
-                options=[
-                    {'label': f'{i}am' if i < 12 else f'{i-12}pm' if i > 12 else '12pm', 'value': i} for i in range(9, 22)
-                ],
-                value=9,
-                multi=False,
+                clearable=False,
                 style={'width': '100%', 'margin-bottom': '10px'}
             ),
             dcc.Dropdown(
@@ -138,6 +131,17 @@ dash_app.layout = html.Div([
                 ],
                 value=1,
                 multi=False,
+                clearable=False,
+                style={'width': '100%', 'margin-bottom': '10px'}
+            ),
+            dcc.Dropdown(
+                id='hour-dropdown',
+                options=[
+                    {'label': f'{i}am' if i < 12 else f'{i-12}pm' if i > 12 else '12pm', 'value': i} for i in range(9, 22)
+                ],
+                value=9,
+                multi=False,
+                clearable=False,
                 style={'width': '100%', 'margin-bottom': '10px'}
             ),
         ], style={'width': '15%', 'margin-right': '20px', 'padding': '20px','margin-right': '15px'}),  # Stacked dropdowns with some styling

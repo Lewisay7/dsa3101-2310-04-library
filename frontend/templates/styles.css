@@ -306,7 +306,7 @@ background-color: #f4f4f4;
 border: 2px solid #e0e0e0;
 border-radius: 10px;
 box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-height: 250px; 
+height: 160px; 
 width: 23%; 
 text-align: center;
 
@@ -348,6 +348,21 @@ box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.4);
 /* Style the submit button on hover */
 .fileupload input[type="submit"]:hover {
 background-color: #2676b7;
+}
+
+button#remove-file {
+  padding: 10px;
+  size: 20px ;
+  font-weight: bold;
+  border-radius: 5px;
+  box-shadow: 2px rgba(108, 108, 108, 0.4);
+}
+
+input#file-input{
+  padding: 10px;
+  size: 20px ;
+  border-radius: 5px;
+  box-shadow: 2px rgba(108, 108, 108, 0.4);
 }
 
 /*styling for total number of students at floor_view html*/

@@ -11,6 +11,7 @@ import cv2
 from dash import Dash, dcc, html, Input, Output
 from heatmap import *
 import plotly.subplots as sp
+import shutil
 
 
 # Your existing Flask app
@@ -639,13 +640,13 @@ def upload_file():
             result_class = "failed"
         else:
             # Generate a temporary file path
-            temp_file_path = os.path.join("datasets", "uploaded_file.csv")
+            temp_file_path = os.path.join("../datasets", "uploaded_file.csv")
             file.save(temp_file_path)
 
             if is_valid_file(temp_file_path):
                 # If the uploaded file has the expected format, move it to the final file path
-                file_path = os.path.join("datasets", "dsa_data.csv")
-                file_path_back = os.path.join("Backend/datasets","dsa_data.csv")
+                file_path = os.path.join("../datasets", "dsa_data.csv")
+                file_path_back = os.path.join("../Backend/datasets","dsa_data.csv")
                 if os.path.exists(file_path):
                     os.remove(file_path)
                 if os.path.exists(file_path_back):

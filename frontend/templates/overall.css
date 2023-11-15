@@ -272,15 +272,22 @@ form#level input[type="submit"]:hover {
   justify-content: center;
 }
 
+/* Heatmap iframe container */
 .heatmap {
   width: 700px;
   height: 450px;
+  border: 2px solid black;
+  overflow: hidden; /* Hide content that exceeds the box */
 }
 
 /* Heatmap iframe */
 .heatmap iframe {
-  width: 100%;
-  height: 100%;
+  width: 720px;
+  height: 470px;
+  border: none; /* Remove the border from the iframe to avoid double borders */
+  margin: 0; /* Remove default margins */
+  padding: 0; /* Remove default padding */
+  transform: translate(-10px, -10px); /* Adjust the values as needed */
 }
 
   

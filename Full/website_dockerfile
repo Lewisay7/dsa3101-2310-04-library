@@ -1,0 +1,23 @@
+# base image
+FROM python:3.10.6-slim-buster
+
+# Set directory to /app
+WORKDIR /app
+
+# Copy scripts into /app
+COPY floorplan_images/ /app/floorplan_images/
+COPY templates/ /app/templates/
+COPY dash_test.py heatmap.py requirements_FE.txt libspace_logo.png dataset_tracker.sh .
+
+# Install dependencies
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements_FE.txt
+RUN apt update && apt install -y libgl1-mesa-glx libglib2.0-0 inotify-tools dos2unix
+
+RUN dos2unix dataset_tracker.sh
+RUN chmod +x dataset_tracker.sh
+
+CMD ["./dataset_tracker.sh"]
+
+# Entrypoint
+ENTRYPOINT python -u -m dash_test

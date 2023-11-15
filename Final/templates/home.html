@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LibSpace</title>
+  <script src="./libspace_logo.png" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+  <header class="header">
+    <a href="https://nus.edu.sg/nuslibraries/spaces/our-libraries/central-library" class="logo"> NUS
+    </a>
+    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b9/NUS_coat_of_arms.svg/1280px-NUS_coat_of_arms.svg.png" alt="me">
+    <nav class="nav-items">
+      <a href="#">Home</a>
+      <a href="#about-section">About</a>
+      <a href="#">Contact</a>
+    </nav>
+  </header>
+  <main>
+    <br>
+    <div class="intro">
+      <h1><img src="./newLibSpace.png" alt="me"></h1>
+      <p>Check your Occupancy here!</p>
+
+    <!-- <form action="/get_time_level" method="POST"> -->
+      <form id="occupancyForm" method="post">
+        <div class="timing-input">
+          <select name="week" id="week">
+            <option value="1">Week 1</option>
+            <option value="2">Week 2</option>
+            <option value="3">Week 3</option>
+            <option value="4">Week 4</option>
+            <option value="5">Week 5</option>
+            <option value="6">Week 6</option>
+            <option value="7">Week 7</option>
+            <option value="8">Week 8</option>
+            <option value="9">Week 9</option>
+            <option value="10">Week 10</option>
+            <option value="11">Week 11</option>
+            <option value="12">Week 12</option>
+            <option value="13">Week 13</option>
+            <option value="Exam">Exam Week</option>
+            <option value="Reading">Reading Week</option>
+            <option value="Recess">Recess Week</option>
+          </select>
+          <select name="day" id="day">
+            <option value="1">Monday</option>
+            <option value="2">Tuesday</option>
+            <option value="3">Wednesday</option>
+            <option value="4">Thursday</option>
+            <option value="5">Friday</option>
+            <option value="6">Saturday</option>
+            <option value="7">Sunday</option>
+          </select>
+          <!--input type="time" id="time" name="time" step = "3600"-->
+          <select id="time" name="time">
+            <option value="1">1 AM</option>
+            <option value="2">2 AM</option>
+            <option value="3">3 AM</option>
+            <option value="4">4 AM</option>
+            <option value="5">5 AM</option>
+            <option value="6">6 AM</option>
+            <option value="7">7 AM</option>
+            <option value="8">8 AM</option>
+            <option value="9">9 AM</option>
+            <option value="10">10 AM</option>
+            <option value="11">11 AM</option>
+            <option value="12">12 PM</option>
+            <option value="13">1 PM</option>
+            <option value="14">2 PM</option>
+            <option value="15">3 PM</option>
+            <option value="16">4 PM</option>
+            <option value="17">5 PM</option>
+            <option value="18">6 PM</option>
+            <option value="19">7 PM</option>
+            <option value="20">8 PM</option>
+            <option value="21">9 PM</option>
+            <option value="22">10 PM</option>
+            <option value="23">11 PM</option>
+            <option value="24">12 AM</option>
+            
+          </select>
+          <select id="level" name="level">
+            <option value="3">Level 3</option>
+            <option value="4">Level 4</option>
+            <option value="5">Level 5</option>
+            <option value="6">Level 6</option>
+            <option value="6Chinese">Level 6 Chinese</option>
+          </select>
+          <button id="checkOccupancyButton" type="submit" onclick="checkOccupancy()">Check Occupancy</button>
+          <button id="OverallButton" type="submit" onclick="overall()">Check Overall</button>
+        </div>
+      </form>
+      <br>
+      <br>
+      <div class="fileupload">
+        <h1>Upload a CSV or Excel file:</h1>
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" id="file-input" accept=".csv, .xls, .xlsx">
+            <button type="button" id="remove-file">Remove File</button>
+            <input type="submit" value="Upload and Convert">
+            
+        </form>
+    </div>
+    
+
+    </div>
+
+
+
+    <div class="about-clb" id="about-section">
+      <div class="about-clb-text">
+        <h2>About NUSLibSpace</h2>
+        <p> The "Library Occupancy Modeling Website" project aims to develop a user-friendly web-based tool for librarians and library management staff at NUS Central Library. 
+          The tool will provide real-time information on library occupancy levels for each floor of the library and enable users to input specific parameters to simulate different occupancy scenarios.
+           This project aligns with the goal of optimising library space utilisation and resource management.</p>
+      </div>
+      <img src="https://nus.edu.sg/nuslibraries/images/default-source/library-details/image-virtual-tour.png?sfvrsn=2d6c4361_2" alt="me">
+    </div>
+  </main>
+
+
+
+  <footer class="footer">
+    <div class="copy">&copy; 2023 LibSpace</div>
+    <div class="bottom-links">
+      <div class="links">
+        <span>More Info</span>
+        <a href="#">Home</a>
+        <a href="#about-section">About</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="links">
+        <span>Social Links</span>
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+  </footer>
+
+
+
+
+  
+  <script>
+    function checkOccupancy() {
+        submitForm("/get_time_level");
+    }
+
+    function overall() {
+        submitForm("/get_time_overall");
+    }
+
+    function submitForm(action) {
+        // Get the form and set its action attribute
+        const form = document.getElementById("occupancyForm");
+        form.action = action;
+
+        // Get the value from the timing input fields
+        const timingInput = document.getElementById("time").value;
+        const levelInput = document.getElementById("level").value;
+        const weekInput = document.getElementById("week").value;
+        const dayInput = document.getElementById("day").value;
+
+        // Check if the input is empty
+        if (timingInput === "" || levelInput === "") {
+            const warningMessage = document.getElementById("warningMessage");
+            warningMessage.classList.remove("hidden");
+        } else {
+            const warningMessage = document.getElementById("warningMessage");
+            warningMessage.classList.add("hidden");
+
+            // Programmatically submit the form
+            form.submit();
+        }
+    }
+
+  document.getElementById('remove-file').addEventListener('click', function () {
+        document.getElementById('file-input').value = '';
+    });
+
+  </script>
+  
+</body>
+
+</html>

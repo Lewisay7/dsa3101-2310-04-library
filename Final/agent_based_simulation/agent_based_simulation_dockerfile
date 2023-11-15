@@ -19,7 +19,7 @@ RUN mkdir /home/netlogo \
 RUN pip3 install pandas numpy
 
 COPY agent_based_simulation_model.nlogo /home/
-COPY ../datasets/ /home/datasets/
+COPY ./datasets/ /home/datasets/
 
 RUN mv /home/agent_based_simulation_model.nlogo /home/NLModel.nlogo
 

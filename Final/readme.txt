@@ -30,8 +30,8 @@ note:
 
 EXTRA: agent based simulation folder contains (work in progress)
 * not part of our website but is what we plan to implement to improve our visualisation
-* to see how it works cd to dir, docker compose up -d, go to http://localhost:10000/index.html?password=111
-* folder contains
+* to see how it works cd to dir, docker compose up -d, go to containers of docker desktop and manually start netlogo container, go to http://localhost:10000/index.html?password=111
+* folder contains:
 1. agent_based-simulation_model
 2. agent_based_simulation_model.nlogo
 3. docker-compose

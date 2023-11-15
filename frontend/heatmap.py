@@ -58,7 +58,7 @@ def compute_contour_data(seat_type, coordinates_list, students, contour_data, te
     for x1, x2, y1, y2 in coordinates_list:
         student_count = students.get(seat_type, 0)
         # Update the corresponding region in the contour data
-        contour_data[y1:y2 + 1, x1:x2 + 1] = student_count
+        contour_data[y1:y2 + 1, x1:x2 + 1] = round((student_count/(actual_seat_count[level][seat_type]))*100,2)
         # Update the text data for hover information
         occupancy_rate = round((student_count/(actual_seat_count[level][seat_type]))*100,2)
         seat = seat_names[seat_type]
@@ -100,7 +100,7 @@ def generate_floorplan_contour_html(image_path, region, students,level,seat_name
     fig = go.Figure()
 
     # Add filled contour plot using the custom colormap
-    heatmap_trace = go.Heatmap(z=contour_data, colorscale=color_list, showscale=True, zmin=0, zmax=max(students.values()), opacity=0.8,
+    heatmap_trace = go.Heatmap(z=contour_data, colorscale=color_list, showscale=True, zmin=0, zmax=100, opacity=0.8,
                                hoverinfo="text", text=text_data)
 
     # Add floorplan image as background
@@ -177,7 +177,7 @@ def generate_floorplan_contour(image_path, region, students,level,seat_names,act
     fig = go.Figure()
 
     # Add filled contour plot using the custom colormap
-    heatmap_trace = go.Heatmap(z=contour_data, colorscale=color_list, showscale=True, zmin=0, zmax=max(students.values()), opacity=0.8,
+    heatmap_trace = go.Heatmap(z=contour_data, colorscale=color_list, showscale=True, zmin=0, zmax=100, opacity=0.8,
                                hoverinfo="text", text=text_data)
 
     # Add floorplan image as background

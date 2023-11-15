@@ -200,36 +200,46 @@ def main():
     #clean data for records that have specific "Entry" or "Exit" labels
     df = basic_cleaning(DATA)
     df_specific = df[df['Direction'].isin(['Entry','Exit']) == True]
-    df_specific = df_specific.sort_values(by=['User Number','Datetime'])
-    df_specific['Direction_lead'] = df_specific['Direction'].shift(-1)
-    df_specific['Direction_lag'] = df_specific['Direction'].shift(1)
-    df_specific = df_specific[((df_specific['Direction'] == 'Entry') & (df_specific['Direction_lead'] != 'Entry') == True) |
-            ((df_specific['Direction'] == 'Exit') & (df_specific['Direction_lag'] != 'Exit') == True) ].reset_index(drop=True)
 
-    outlier = get_outlier_records(df_specific).reset_index(drop = True)
+    #if there exists "entry" or "exit" labels
+    if len(df_specific) != 0:
+        df_specific = df_specific.sort_values(by=['User Number','Datetime'])
+        df_specific['Direction_lead'] = df_specific['Direction'].shift(-1)
+        df_specific['Direction_lag'] = df_specific['Direction'].shift(1)
+        df_specific = df_specific[((df_specific['Direction'] == 'Entry') & (df_specific['Direction_lead'] != 'Entry') == True) |
+                ((df_specific['Direction'] == 'Exit') & (df_specific['Direction_lag'] != 'Exit') == True) ].reset_index(drop=True)
 
-    outlier_solution = fix_outlier_records(outlier)
-    
-    clean_specific = pd.concat([df_specific,outlier,outlier_solution]).drop(columns=['Direction_lead','Direction_lag']).sort_values(by = ['User Number', 'Date', 'Time']).drop_duplicates().reset_index(drop = True)
-    
+        outlier = get_outlier_records(df_specific).reset_index(drop = True)
+
+        outlier_solution = fix_outlier_records(outlier)
+        
+        clean_specific = pd.concat([df_specific,outlier,outlier_solution]).drop(columns=['Direction_lead','Direction_lag']).sort_values(by = ['User Number', 'Date', 'Time']).drop_duplicates().reset_index(drop = True)
+    #else cleaned DataFrame is empty
+    else:
+        clean_specific = pd.DataFrame()
 
 
     #clean data for records that have ambiguous label "Entry/Exit"
     df2 = basic_cleaning(DATA)
     df_random = df2[df2['Direction'].isin(['Entry/Exit']) == True]
-    df_random = df_random.sort_values(by=['User Number','Datetime']).reset_index()
-    df_random['Datetime'] = df_random['Datetime'].apply(lambda x: x.replace('+08:00',''))
 
+    #if there exists "entry/exit" labels
+    if len(df_random) != 0:
+        df_random = df_random.sort_values(by=['User Number','Datetime']).reset_index()
+        df_random['Datetime'] = df_random['Datetime'].apply(lambda x: x.replace('+08:00',''))
 
-    df_random = assign_entry_exit(df_random).drop(columns=['index']).reset_index(drop=True)
+        df_random = assign_entry_exit(df_random).drop(columns=['index']).reset_index(drop=True)
 
-    outlier_random = get_outlier_records_random(df_random)
+        outlier_random = get_outlier_records_random(df_random)
 
-    outlier_solution_random = fix_outlier_random(outlier_random)
+        outlier_solution_random = fix_outlier_random(outlier_random)
 
-    clean_random = pd.concat([df_random,outlier_solution_random])
-    clean_random = clean_random.reset_index(drop=True).drop_duplicates(subset=['User Number','Date','Time']).sort_values(by = ['User Number', 'Date', 'Time']).reset_index(drop=True)
-    
+        clean_random = pd.concat([df_random,outlier_solution_random])
+        clean_random = clean_random.reset_index(drop=True).drop_duplicates(subset=['User Number','Date','Time']).sort_values(by = ['User Number', 'Date', 'Time']).reset_index(drop=True)
+    #else cleaned DataFrame is empty
+    else:
+        clean_random = pd.DataFrame()
+
     #combine both types of records into a single dataframe and perform a final round of cleaning to ensure data is logical
     clean_df = pd.concat([clean_specific,clean_random]).sort_values(by = ['User Number', 'Date', 'Time']).reset_index(drop=True)
     clean_df = final_clean(clean_df).reset_index(drop=True)
@@ -250,7 +260,7 @@ def main():
     #add a column for datetime to plot the graph and to calculate average occupancy
     clean_entry["Datetime"] = pd.to_datetime(clean_entry["Date"].astype(str) + " " +  clean_entry["Time"].astype(str))
     clean_exit["Datetime"] = pd.to_datetime(clean_exit["Date"].astype(str) + " " + clean_exit["Time"].astype(str))
-    
+
     #concat entry and exit data to one dataframe with columns [Direction,Datetime,Date]
     clean_df = pd.concat([clean_entry,clean_exit],ignore_index=True)
     clean_df = clean_df.sort_values(by = "Datetime")

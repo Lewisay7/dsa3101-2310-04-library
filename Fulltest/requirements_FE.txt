@@ -1,0 +1,8 @@
+Flask
+matplotlib
+plotly
+numpy
+opencv-python
+dash
+pillow
+pandas

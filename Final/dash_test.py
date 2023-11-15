@@ -661,7 +661,7 @@ def occupancy_by_level_pie(time,week,day):
     label_list = []
     subplot_titles =['Level 3','Level 4','Level 5','Level 6','Level 6 (Chinese']
 
-    max_seat = pd.read_csv('../datasets/actual_seat_count.csv')
+    max_seat = pd.read_csv('./datasets/actual_seat_count.csv')
     # Calculate the total occupancy for the filtered data
     # Get Occupancy by level 
     for i in range(3,8):
@@ -694,7 +694,7 @@ def occupancy_by_level_pie(time,week,day):
 
 # Create pie chart for single floor
 def occupancy_level_pie(level, time, week, day):
-    max_seat = pd.read_csv('../datasets/actual_seat_count.csv')
+    max_seat = pd.read_csv('./datasets/actual_seat_count.csv')
     
     # Calculate the total occupancy for the filtered data
     fil = calculate_total_occupancy(df, level, time, week, day)

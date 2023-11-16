@@ -28,18 +28,22 @@ csv_file_path = '../datasets/model_output.csv'
 df = pd.read_csv(csv_file_path)
 actual_seat_path = '../datasets/actual_seat_count.csv'
 seat_df = pd.read_csv(actual_seat_path)
+
 ## predefined inputs
 """time_dict = {'label': f'{i}am' if i < 12 else f'{i-12}pm' if i > 12 else '12pm', 'value': i} for i in range(9, 22)
 time_mapping = {i: f"{i % 12 or 12} {'AM' if i < 12 else 'PM'}" for i in range(1, 25)}
 print(time_mapping.get(4))
 print(time_mapping.get(12))
 print(time_mapping.get(24))"""
+
+#Paths to floorplan images
 images_path = {'3': "floorplan_images/L3_grayscale_downsized.jpg",
                '4':"floorplan_images/L4_grayscale_downsized.jpg",
                '5': 'floorplan_images/L5_grayscale_downsized.jpg',
                '6':"floorplan_images/L6_grayscale_downsized.jpg",
                '6Chinese':"floorplan_images/L6C_grayscale_downsized.jpg"}
 
+# Dictionary created to store the number of seats, update as required
 actual_seat_count = {'3':{'Discussion.Cubicles':56,
                             'Soft.seats':132,
                             'Moveable.seats':156},
@@ -55,6 +59,7 @@ actual_seat_count = {'3':{'Discussion.Cubicles':56,
                                     'Cubicle.seats':155,
                                     'Windowed.Seats':136}}
 
+# Pixel coordinates of the seat types on the floorplan to generate heatmap, update as needed
 regions_coordinates = {'3':{'Discussion.Cubicles':[[1137,1409,509,566],[1088,1439,114,168]],
                             'Soft.seats':[[467,933,41,66],[521,929,143,266],[1184,1431,632,662],[1185,1431,41,72]],
                             'Moveable.seats':[[1149,1406,233,464]]},
@@ -191,7 +196,7 @@ def update_all_graphs(selected_level, selected_week, selected_hour, selected_day
 def index():
     return render_template('home.html')
 
-#Check occupancy button on home page and on floor_view page
+#Calling this function after pressing check occupancy button on home page
 @app.route('/get_time_level', methods=['POST'])
 def check_occupancy():
     level = request.form.get('level')
@@ -204,6 +209,7 @@ def check_occupancy():
 
     return render_template('floor_view.html')
 
+#Calling this function after pressing check overall button on home page
 @app.route('/get_time_overall', methods=['POST'])
 def overall():
     level = {'3','4','5','6','6Chinese'}
@@ -232,22 +238,11 @@ def overall():
 
     return render_template('overall_view.html',day = days.get(day_string), time = timing.get(time_string), week = week, total_occupancy = total_occupancy, total_rate = total_rate)
 
+#==================================Graph functions to generate plots on /get_time_overall=========================================================
+# Those comments that start with "Generating" are the actual functions to produce the plots, other functions are supporting functions to calculate the required inputs
+# Function to generate the actual heatmap is imported from another script, heatmap.py
 
-#total number of students for all floor
-def overall_occupancy(df,time,week,day):
-    filtered_df = df[(df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
-    occupancy = filtered_df['occupancy'].sum()
-    return occupancy
-
-# total number of students of each floor 
-def level_total_occupancy(df,level,time,week,day):
-    # Filter the DataFrame based on the parameters, replace for more filters
-    filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
-    # Calculate the total occupancy for the filtered data
-    occupancy = filtered_df['occupancy'].sum()
-
-    return occupancy
-
+# Forming a dictionary to store the occupancy by seat types for the students input in generating heatmap
 def form_seat_types_occupancy(df, level,time,week,day):
     filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
     seat_type = {}
@@ -261,7 +256,22 @@ def form_seat_types_occupancy(df, level,time,week,day):
         seat_type[seat] = number
     return seat_type
 
-#function to calculate the overall occupancy rate of the library
+# Calculating the overall total number of students in the library
+def overall_occupancy(df,time,week,day):
+    filtered_df = df[(df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
+    occupancy = filtered_df['occupancy'].sum()
+    return occupancy
+
+#Calculating the total number of students by level
+def level_total_occupancy(df,level,time,week,day):
+    # Filter the DataFrame based on the parameters, replace for more filters
+    filtered_df = df[(df['level'] == level) & (df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
+    # Calculate the total occupancy for the filtered data
+    occupancy = filtered_df['occupancy'].sum()
+
+    return occupancy
+
+#Calculating the overall occupancy rate in the library
 def overall_occupancy_rate(df, seat_df, time, week,day):
     occupancy = overall_occupancy(df,time,week,day)
     total_seats = 0
@@ -271,7 +281,7 @@ def overall_occupancy_rate(df, seat_df, time, week,day):
     total_rate = round(total_rate,1)
     return total_rate
     
-#function to get a dictionary containing capacity by floor
+#Function to get a dictionary containing maximum capacity by floor
 ## {'3': 344, '4': 300, '5': 477, '6Chinese': 160, '6': 383}
 def capacity_by_floor(seat_df):
     capacity = {}
@@ -281,7 +291,7 @@ def capacity_by_floor(seat_df):
         capacity[seat_df.iloc[i]['level']] +=  seat_df.iloc[i]['count']
     return capacity 
 
-# Generate a barplot of number of students by Level
+# Generating a barplot showing the number of students by Level
 def overall_occupancy_by_level(time, week, day):
     plot1y = []
     plot1x = [3, 4, 5, 6, 7]
@@ -315,7 +325,7 @@ def overall_occupancy_by_level(time, week, day):
     max_y_axis = max(plot1y)*1.2
     fig = go.Figure(data=go.Bar(x=plot1x, y=plot1y,text=plot1y, textposition='outside', textfont=dict(size=20),textfont_size=24))
     # Add labels and title
-    fig.update_layout( xaxis_title="", yaxis_title="", title=dict(text = "<b>"+'Occupancy in each Level'+"</b>", font=dict(size=20,)), title_x = 0.5,plot_bgcolor='white',margin=dict(t=50,b=10) )
+    fig.update_layout( xaxis_title="", yaxis_title="", title=dict(text = "<b>"+'Number of Students in each Level'+"</b>", font=dict(size=20,)), title_x = 0.5,plot_bgcolor='white',margin=dict(t=50,b=10) )
     new_tick_values = ["Level 3", "Level 4", "Level 5", "Level 6", "Chinese"]
     fig.update_xaxes(type='category', tickmode='array', tickvals=plot1x, ticktext=new_tick_values,tickfont=dict(size=15))
     fig.update_yaxes(tickfont=dict(size=15), range = [0, max_y_axis])
@@ -326,7 +336,7 @@ def overall_occupancy_by_level(time, week, day):
 
     fig.write_html("./templates/overall_plots/occupancy_by_level.html")
 
-#generate a horizontal bar plot of occupancy rates by level
+#Generate a horizontal bar plot showing the occupancy rates by level
 def rate_by_level(time, week, day):
     plot1y = []
     plot1x = [3, 4, 5, 6, 7]
@@ -387,7 +397,7 @@ def rate_by_level(time, week, day):
 
     fig.write_html("./templates/overall_plots/rate_by_level.html")
 
-# Generate heatmaps of all level
+# Generating heatmaps of all level by saving it as a html
 def generate_heatmap(level, week, hour, day):
     region = regions_coordinates[level]
     students = form_seat_types_occupancy(df, level, hour, week, day)
@@ -395,7 +405,7 @@ def generate_heatmap(level, week, hour, day):
     heatmap_fig = generate_floorplan_contour_html(image_path, region, students,level,seat_names,actual_seat_count)
     return heatmap_fig
 
-#generate gauge chart of overall occupancy
+#Generating gauge chart of overall occupancy rate in library
 def overall_gauge_chart(occupancy_percentage):
     fig = go.Figure()
 
@@ -415,15 +425,7 @@ def overall_gauge_chart(occupancy_percentage):
     )
     fig.write_html("./templates/overall_plots/gauge.html")
 
-
-
-def generate_heatmap_fig(level, week, hour, day):
-    region = regions_coordinates[level]
-    students = form_seat_types_occupancy(df, level, hour, week, day)
-    image_path = images_path[level]
-    heatmap_fig = generate_floorplan_contour(image_path, region, students,level,seat_names,actual_seat_count)
-    return heatmap_fig
-
+#============================================ Graph Functions to generate plots on /get_time_level page =====================================
 def calculate_total_occupancy(df,level,time,week,day):
     if level == "overall":
         filtered_df = df[(df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
@@ -436,6 +438,12 @@ def calculate_total_occupancy(df,level,time,week,day):
 
     return occupancy
 
+def generate_heatmap_fig(level, week, hour, day):
+    region = regions_coordinates[level]
+    students = form_seat_types_occupancy(df, level, hour, week, day)
+    image_path = images_path[level]
+    heatmap_fig = generate_floorplan_contour(image_path, region, students,level,seat_names,actual_seat_count)
+    return heatmap_fig
 
 # Generate barplot of Occupancy over time for a specific week, day and level
 def occupancy_by_time(level, time, week, day):

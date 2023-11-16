@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  netlogo:
+    build:
+      context: .
+      dockerfile: agent_based_simulation_dockerfile
+      args:
+        NETLOGO_VERSION: 6.3.0
+    container_name: netlogo
+    volumes_from:
+      - x11-bridge
+
+  x11-bridge:
+    image: jare/x11-bridge
+    container_name: x11-bridge
+    environment:
+      - MODE=tcp
+      - XPRA_HTML=yes
+      - DISPLAY=:14
+      - XPRA_PASSWORD=111
+    ports:
+      - "10000:10000"

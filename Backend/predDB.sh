@@ -14,6 +14,9 @@ SSH_PID=$!
 # Give the SSH tunnel a moment to establish
 sleep 5
 
+# Empty the table before importing new data
+mysql -h $HOST -P $PORT -u $USER -p$PASSWORD $DATABASE -e "TRUNCATE TABLE $TABLE;"
+
 # Use MySQL command line tool to import the CSV into the database
 mysql --local-infile=1 -h $HOST -P $PORT -u $USER -p$PASSWORD $DATABASE -e "
     LOAD DATA LOCAL INFILE '$FILE_PATH' 
@@ -24,8 +27,5 @@ mysql --local-infile=1 -h $HOST -P $PORT -u $USER -p$PASSWORD $DATABASE -e "
     IGNORE 1 LINES;
 "
 
+# Stop the SSH tunnel
 kill $SSH_PID
-
-
-
-

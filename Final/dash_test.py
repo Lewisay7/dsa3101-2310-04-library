@@ -351,7 +351,7 @@ def upload_file():
     return render_template('upload.html', result=result, result_class=result_class)
 
 
-================================Graph functions to generate plots on /get_time_overall=========================================================
+#================================Graph functions to generate plots on /get_time_overall=========================================================
 # Those comments that start with "Generating" are the actual functions to produce the plots, other functions are supporting functions to calculate the required inputs
 # Function to generate the actual heatmap is imported from another script, heatmap.py
 

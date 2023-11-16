@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+
+import os
+import shutil
 import math
 from flask import Flask, render_template, request
 from matplotlib.colors import LinearSegmentedColormap
@@ -11,7 +15,8 @@ import cv2
 from dash import Dash, dcc, html, Input, Output
 from heatmap import *
 import plotly.subplots as sp
-import shutil
+from sshtunnel import SSHTunnelForwarder
+import mysql.connector
 
 
 # Your existing Flask app
@@ -24,18 +29,80 @@ dash_app = Dash(__name__, server=app, url_base_pathname='/dashboard/')
 #server = app.server
 
 # Load dataset
-csv_file_path = '../datasets/model_output.csv'
-df = pd.read_csv(csv_file_path)
-actual_seat_path = '../datasets/actual_seat_count.csv'
-seat_df = pd.read_csv(actual_seat_path)
+def connect_database_download_data():
+  """
+  Connect to the database and download cleaned data 
+  """
+  config_path = './config.sh'
+  config_vars = {}
 
+  with open(config_path, 'r') as file:
+    for line in file:
+      if line.startswith('#') or '=' not in line:
+          continue
+      key, value = line.split('=', 1)
+      key = key.strip()
+      value = value.strip().strip("'").strip('"')
+      config_vars[key] = value
+    
+
+
+  ssh_host = config_vars['SSH_HOST']
+  ssh_username = config_vars['SSH_USER']
+  ssh_key_path = config_vars['SSH_KEY_PATH']
+  mysql_host = config_vars['HOST']
+  mysql_user = config_vars['USER']
+  mysql_password = config_vars['PASSWORD']
+  mysql_db = config_vars['DATABASE']
+  local_bind_port = 5000
+  mysql_port = 3306
+  remote_bind_port = mysql_port
+  try:
+    tunnel = SSHTunnelForwarder(
+      (ssh_host, 22),
+      ssh_username=ssh_username,
+      ssh_private_key=ssh_key_path,
+      remote_bind_address=(mysql_host, remote_bind_port),
+      local_bind_address=('127.0.0.1', local_bind_port)
+    )
+    tunnel.start()
+  except Exception as e:
+    exit(1)
+
+  try:
+    connection = mysql.connector.connect(
+      user=mysql_user,
+      password=mysql_password,
+      host='127.0.0.1',
+      port=local_bind_port, 
+      database=mysql_db,
+      use_pure=True
+    )
+
+    if connection.is_connected():
+      cursor = connection.cursor()
+      sample_query = "SELECT * FROM PredictionTable;"
+      cursor.execute(sample_query)
+      result = cursor.fetchall()
+      df = pd.DataFrame(result, columns=[desc[0] for desc in cursor.description])
+      cursor.close()
+  except mysql.connector.Error:
+      pass
+  finally:
+      if 'connection' in locals() or 'connection' in globals() and connection.is_connected():
+        connection.close()
+      tunnel.stop()
+  return df
+df = connect_database_download_data()
+
+actual_seat_path = './datasets/actual_seat_count.csv'
+seat_df = pd.read_csv(actual_seat_path)
 ## predefined inputs
 """time_dict = {'label': f'{i}am' if i < 12 else f'{i-12}pm' if i > 12 else '12pm', 'value': i} for i in range(9, 22)
 time_mapping = {i: f"{i % 12 or 12} {'AM' if i < 12 else 'PM'}" for i in range(1, 25)}
 print(time_mapping.get(4))
 print(time_mapping.get(12))
 print(time_mapping.get(24))"""
-
 #Paths to floorplan images
 images_path = {'3': "floorplan_images/L3_grayscale_downsized.jpg",
                '4':"floorplan_images/L4_grayscale_downsized.jpg",
@@ -196,7 +263,7 @@ def update_all_graphs(selected_level, selected_week, selected_hour, selected_day
 def index():
     return render_template('home.html')
 
-#Calling this function after pressing check occupancy button on home page
+#Check occupancy button on home page and on floor_view page
 @app.route('/get_time_level', methods=['POST'])
 def check_occupancy():
     level = request.form.get('level')
@@ -209,7 +276,6 @@ def check_occupancy():
 
     return render_template('floor_view.html')
 
-#Calling this function after pressing check overall button on home page
 @app.route('/get_time_overall', methods=['POST'])
 def overall():
     level = {'3','4','5','6','6Chinese'}
@@ -225,7 +291,7 @@ def overall():
         generate_heatmap(i,week,time,day)
 
     #total occupancy for all floors
-    df = pd.read_csv(csv_file_path)
+    df = connect_database_download_data()
     seat_df = pd.read_csv(actual_seat_path)
     time_string = str(time)
     day_string = str(day)
@@ -238,7 +304,54 @@ def overall():
 
     return render_template('overall_view.html',day = days.get(day_string), time = timing.get(time_string), week = week, total_occupancy = total_occupancy, total_rate = total_rate)
 
-#==================================Graph functions to generate plots on /get_time_overall=========================================================
+
+
+def is_valid_file(file_path):
+    try:
+        df = pd.read_csv(file_path)
+        return len(df.columns) == 6 
+    except Exception:
+        return False
+    
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    result = ''
+    result_class = ''
+    file_path = None
+
+    if 'file' not in request.files:
+        result = "No file part"
+        result_class = "failed"
+    else:
+        file = request.files['file']
+        if file.filename == '':
+            result = "No selected file"
+            result_class = "failed"
+        else:
+            # Generate a temporary file path
+            temp_file_path = os.path.join("uploaded_file.csv")
+            file.save(temp_file_path)
+
+            if is_valid_file(temp_file_path):
+                # If the uploaded file has the expected format, move it to the final file path
+                file_path = os.path.join("datasets", "dsa_data.csv")
+                
+                shutil.copy(temp_file_path, file_path)
+
+                result = "File uploaded and saved as dsa_data.csv"
+                result_class = "uploaded"
+                os.system('python3 data_cleaning.py')
+            else:
+                result = "Uploaded file does not have 7 columns"
+                result_class = "failed"
+
+            # Remove the temporary file
+            os.remove(temp_file_path)
+
+    return render_template('upload.html', result=result, result_class=result_class)
+
+
+================================Graph functions to generate plots on /get_time_overall=========================================================
 # Those comments that start with "Generating" are the actual functions to produce the plots, other functions are supporting functions to calculate the required inputs
 # Function to generate the actual heatmap is imported from another script, heatmap.py
 
@@ -251,7 +364,7 @@ def form_seat_types_occupancy(df, level,time,week,day):
             seat_type[i] = 0
 
     for i in range(filtered_df.shape[0]):
-        seat = filtered_df.iloc[i]['seat_type']
+        seat = filtered_df.i#==loc[i]['seat_type']
         number = filtered_df.iloc[i]['occupancy']
         seat_type[seat] = number
     return seat_type
@@ -624,59 +737,5 @@ def occupancy_level_pie(level, time, week, day):
 
     return fig
 
-
-def is_valid_file(file_path):
-    try:
-        df = pd.read_csv(file_path)
-        return len(df.columns) == 6 
-    except Exception:
-        return False
-    
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    result = ''
-    result_class = ''
-    file_path = None
-
-    if 'file' not in request.files:
-        result = "No file part"
-        result_class = "failed"
-    else:
-        file = request.files['file']
-        if file.filename == '':
-            result = "No selected file"
-            result_class = "failed"
-        else:
-            # Generate a temporary file path
-            temp_file_path = os.path.join("../datasets", "uploaded_file.csv")
-            file.save(temp_file_path)
-
-            if is_valid_file(temp_file_path):
-                # If the uploaded file has the expected format, move it to the final file path
-                file_path = os.path.join("../datasets", "dsa_data.csv")
-                file_path_back = os.path.join("../Backend/datasets","dsa_data.csv")
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-                if os.path.exists(file_path_back):
-                    os.remove(file_path_back)
-                
-                os.rename(temp_file_path, file_path)
-                shutil.copy(file_path, file_path_back)
-
-                result = "File uploaded and saved as dsa_data.csv"
-                result_class = "uploaded"
-            else:
-                result = "Uploaded file does not have 7 columns"
-                result_class = "failed"
-
-            # Remove the temporary file
-            if os.path.exists(temp_file_path):
-                os.remove(temp_file_path)
-
-    return render_template('upload.html', result=result, result_class=result_class)
-
-
 if __name__ == '__main__':
     app.run(debug = True,port=5050, host='0.0.0.0')
-
-

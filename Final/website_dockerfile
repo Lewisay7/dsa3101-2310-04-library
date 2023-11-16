@@ -1,0 +1,20 @@
+# base image
+FROM ubuntu
+
+# Set directory to /app
+WORKDIR /app
+
+# Copy scripts into /app
+COPY . /app
+
+# Install dependencies
+RUN apt update && apt install -y libgl1-mesa-glx libglib2.0-0 mysql-server mysql-client dos2unix openssh-client python3 python3-pip
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
+
+RUN dos2unix /app/libDB.sh /app/predDB.sh /app/config.sh
+RUN chmod +x /app/libDB.sh /app/predDB.sh /app/data_cleaning.py /app/predictive_model.py
+RUN chmod 600 /app/DSA3101-2310-04-lib.pem
+
+# Entrypoint
+ENTRYPOINT python3 -u -m dash_test

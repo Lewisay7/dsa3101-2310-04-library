@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  website:
+    build:
+      context: .
+      dockerfile: website_dockerfile
+    stdin_open: true
+    tty: true
+    ports:
+      - "5050:5050"
+      - "3308:3306"
+      - "5000:3306"
+      - "3309:3306"

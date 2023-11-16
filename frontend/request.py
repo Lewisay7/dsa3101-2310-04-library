@@ -79,16 +79,6 @@ def check_occupancy():
     #occupancy by seat types by floor
     form_seat_types_occupancy(df, level,time,week,day)
 
-    # Three different graphs, comment out the ones you don't want
-    # occupancy_by_time(level, time, week, day)
-    # occupancy_by_level(time, week, day)
-    # occupancy_by_seat(level, time, week, day)
-
-    # region = regions_coordinates[level]
-    # students = form_seat_types_occupancy(df,level,time,week,day)
-    # image_path = images_path[level]
-    # image = cv2.imread(image_path)
-    # heatmap_floor = generate_floorplan_contour(image_path, region, students)
     
 
     return render_template('floor_view.html',  time=time, level=level, total_occupancy=total_occupancy, week=week, day=day)

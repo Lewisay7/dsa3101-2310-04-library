@@ -248,6 +248,8 @@ dash_app.layout = html.Div([
      Input('hour-dropdown', 'value'),
      Input('day-dropdown', 'value')]
 )
+
+#Updating dashboard on floor_view page when input changes
 def update_all_graphs(selected_level, selected_week, selected_hour, selected_day):
     fig_time = occupancy_by_time(selected_level, selected_hour, selected_week, selected_day)
     fig_level = occupancy_by_level(selected_hour, selected_week, selected_day)
@@ -263,17 +265,9 @@ def update_all_graphs(selected_level, selected_week, selected_hour, selected_day
 def index():
     return render_template('home.html')
 
-#Check occupancy button on home page and on floor_view page
+#Triggered when check occupancy button on home page and floor_view page is pressed
 @app.route('/get_time_level', methods=['POST'])
 def check_occupancy():
-    level = request.form.get('level')
-    week = request.form.get('week')
-    time = int(request.form.get('time'))
-    day = int(request.form.get('day'))
-
-    #total occupancy for all floors
-    total_occupancy = calculate_total_occupancy(df, level, time, week,day)
-
     return render_template('floor_view.html')
 
 @app.route('/get_time_overall', methods=['POST'])
@@ -351,7 +345,7 @@ def upload_file():
     return render_template('upload.html', result=result, result_class=result_class)
 
 
-#================================Graph functions to generate plots on /get_time_overall=========================================================
+#================================Graph and occupancy functions to generate resultss on /get_time_overall page =========================================================
 # Those comments that start with "Generating" are the actual functions to produce the plots, other functions are supporting functions to calculate the required inputs
 # Function to generate the actual heatmap is imported from another script, heatmap.py
 
@@ -538,7 +532,7 @@ def overall_gauge_chart(occupancy_percentage):
     )
     fig.write_html("./templates/overall_plots/gauge.html")
 
-#============================================ Graph Functions to generate plots on /get_time_level page =====================================
+#============================================ Graph and Occupancy functions to generate results on /get_time_level page =====================================
 def calculate_total_occupancy(df,level,time,week,day):
     if level == "overall":
         filtered_df = df[(df['hour'] == time) & (df["week"] == week) &(df["day"] == day)]
@@ -666,42 +660,6 @@ def occupancy_by_seat(level, time, week, day):
     ,marker_color=colors)
 
     return fig
-
-def occupancy_by_level_pie(time,week,day):
-    plot1y = []
-    label_list = []
-    subplot_titles =['Level 3','Level 4','Level 5','Level 6','Level 6 (Chinese']
-
-    max_seat = pd.read_csv('./datasets/actual_seat_count.csv')
-    # Calculate the total occupancy for the filtered data
-    # Get Occupancy by level 
-    for i in range(3,8):
-        x = str(i)
-        if i == 7:
-            x = "6Chinese"
-        filtered_seat = max_seat[(df['level'] == x)]
-        occupancy = filtered_seat['count'].sum()
-        fil = calculate_total_occupancy(df, x, time, week,day)
-        non_occupied = occupancy-fil
-        occupied_vs_non = [fil,non_occupied]
-        plot1y.append(occupied_vs_non)
-        vslabels = ["Occupied", "Not Occupied"]
-        label_list.append(vslabels)
-
-
-    """labels_list = [['Category A', 'Category B', 'Category C'],
-               ['Category X', 'Category Y', 'Category Z']]
-    values_list = [[30, 50, 20], [40, 30, 30]]
-    subplot_titles = ['Pie Chart 1', 'Pie Chart 2']"""
-
-    fig = sp.make_subplots(rows=1, cols=len(label_list), subplot_titles=subplot_titles, specs=[[{'type':'domain'}]*len(label_list)])
-
-    # Add pie charts to subplots
-    for i, (labels, values) in enumerate(zip(label_list, plot1y), start=1):
-        fig.add_trace(go.Pie(labels=labels, values=values), 1, i)
-
-    return fig
-
 
 # Create pie chart for single floor
 def occupancy_level_pie(level, time, week, day):

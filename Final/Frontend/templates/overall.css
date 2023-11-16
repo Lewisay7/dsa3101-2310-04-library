@@ -95,11 +95,6 @@ body {
       border-radius: 5px;
       margin: 0 10px;
   }
-#warningMessage {
-  color :#053F5C;
-  font-family: sans-serif;
-  font-size: 16px;
-}
 
   /* CSS for footer */
   .footer {
@@ -169,30 +164,8 @@ form#level select#selectValue {
   color: #000;
 }
 
-/* Style the dropdown options */
-form#level select#selectValue option {
-  background: #3498db;
-  color: #fff;
-}
 
-/* Style the submit button */
-form#level input[type="submit"] {
-  background-color: rgb(242, 242, 121);
-  color: #302f49;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-/* Style the submit button on hover */
-form#level input[type="submit"]:hover {
-  background-color: #2676b7;
-}
-
-/*styling for total number of students at floor_view html*/
-
+/*styling for overall occupancy result at overall_view html*/
 .occupancy_result{
   margin: 0;
   color:#053F5C;
@@ -209,7 +182,7 @@ form#level input[type="submit"]:hover {
   
 }
 
-/* Widget styles */
+/*Top row  Widget styles */
 .widget-row {
   justify-content: center;
   align-items: center; /* Center horizontally */
@@ -229,6 +202,7 @@ form#level input[type="submit"]:hover {
     flex: 1;
 }
 
+/*styling for gauge chart*/
 .bar-plot {
     width: 100%;
     height: 300px;
@@ -257,7 +231,7 @@ form#level input[type="submit"]:hover {
 }
 
 
-/*heatmaps plots*/
+/*styling for heatmaps plots*/
 .heatmaps {
   justify-content: center;
   margin-top: 20px;
@@ -291,6 +265,7 @@ form#level input[type="submit"]:hover {
 }
 
   
+/*adjust sizes of plots to accomodate for smaller screen devices*/
   @media (max-width: 700px) {
     .col img {
         width: 200px;

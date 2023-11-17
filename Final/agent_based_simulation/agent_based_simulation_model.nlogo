@@ -3,7 +3,7 @@ extensions [csv table py time]
 ; Define a breed of agents called "students"
 breed [students student]
 
-; Global variables to keep track of the current time, number of students, data, counter, and weeks
+; Global variables to keep track of the current time, data
 globals [
   current-time  ; Variable to keep track of the current time (in hours)
   data ;
@@ -31,14 +31,14 @@ to setup
   py:run "import pandas as pd"
   py:run "import numpy"
   py:run "import math"
-
+  py:run "from sshtunnel import SSHTunnelForwarder"
+  py:run "import mysql.connector"
   ; Set week, day, and initialize data
   py:set "week" week
   py:set "day" day
   setup-data
   setup-time-hour
   setup-floors
-
   ; Set default shape for students to "person"
   set-default-shape students "person"
 
@@ -48,12 +48,35 @@ end
 
 ; Procedure to set up data, reading from a CSV file
 to setup-data
-  py:run "data =pd.read_csv('datasets/clean_df.csv',index_col=False)"
+  connect-database
+  ;py:run "data =pd.read_csv('../Shared/datasets/clean_df.csv',index_col=False)"
   py:run "data['Datetime'] = pd.to_datetime(data['Datetime'])"
   py:run "data['Date'] = pd.to_datetime(data['Date'])"
   py:run "data = data.sort_values(by = ['Datetime'])"
   py:run "data['Time'] = data['Datetime'].dt.time"
-  py:run "level_survey = pd.read_csv('datasets/floor.csv')"
+end
+
+; Procedure to connect to the database and fetch data
+to connect-database
+  py:run "ssh_host = 'ec2-34-203-233-122.compute-1.amazonaws.com'"
+  py:run "ssh_username = 'ubuntu'"
+  py:run "ssh_key_path = 'DSA3101-2310-04-lib.pem'"
+  py:run "mysql_host = '127.0.0.1'"
+  py:run "mysql_user = 'OpenAcc'"
+  py:run "mysql_password = 'DSA3101Library'"
+  py:run "mysql_db = 'LibraryDB'"
+  py:run "local_bind_port = 5000"
+  py:run "mysql_port = 3306"
+  py:run "remote_bind_port = mysql_port"
+  py:run "tunnel = SSHTunnelForwarder((ssh_host, 22),ssh_username=ssh_username,ssh_private_key=ssh_key_path,remote_bind_address=(mysql_host, remote_bind_port),local_bind_address=('127.0.0.1', local_bind_port))"
+  py:run "tunnel.start()"
+  py:run "connection = mysql.connector.connect(user=mysql_user,password=mysql_password,host='127.0.0.1',port=local_bind_port, database=mysql_db,use_pure=True)"
+  py:run "cursor = connection.cursor()"
+  py:run "sample_query = 'SELECT * FROM LibraryRecords;'"
+  py:run "cursor.execute(sample_query)"
+  py:run "result = cursor.fetchall()"
+  py:run "data = pd.DataFrame(result, columns=[desc[0] for desc in cursor.description])"
+  py:run "cursor.close()"
 end
 
 ; Procedure to set up time based on the week
@@ -299,7 +322,7 @@ CHOOSER
 week
 week
 "Normal" "Exam" "Reading" "Recess"
-0
+3
 
 CHOOSER
 200
@@ -309,7 +332,7 @@ CHOOSER
 day
 day
 1 2 3 4 5 6 7
-2
+3
 
 MONITOR
 153

@@ -16,10 +16,10 @@ RUN mkdir /home/netlogo \
  && sed -i -e 's/org.nlogo.headless.Main/org.nlogo.app.App/g' /home/netlogo/netlogo-headw.sh \
  && apt-get update && apt-get install -y libxrender1 libxtst6 python3-pip
 
-RUN pip3 install pandas numpy
+RUN pip3 install pandas numpy mysql-connector-python==8.2.0 sshtunnel
 
 COPY agent_based_simulation_model.nlogo /home/
-COPY ./datasets/ /home/datasets/
+COPY ./DSA3101-2310-04-lib.pem /home/
 
 RUN mv /home/agent_based_simulation_model.nlogo /home/NLModel.nlogo
 

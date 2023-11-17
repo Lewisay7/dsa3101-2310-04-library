@@ -21,6 +21,8 @@ note:
 * for security reasons we uploaded the pem file and the datasets folder to sharepoint. Download datasets folder and DSA3101-2310-04-lib.pem from there and put it in the folder named 'Shared' and 'agent_based_simulation'. This is the link:
 https://nusu.sharepoint.com/sites/Section_2310_1390/Shared%20Documents/Forms/AllItems.aspx?csf=1&web=1&e=hbllTP&cid=4c74dee9-5a67-4b25-a88d-a4c6b2b79f43&FolderCTID=0x012000BA950ECCC4DBF0438F37E82EEB2251D1&id=%2Fsites%2FSection_2310_1390%2FShared%20Documents%2FGeneral%2FVideo%20Submissions%2F04-library&viewid=bd5e0aee-4e23-43f5-9177-06817d4333d7
 
+* the SSH_HOST in config.sh has to be changed manually if server is restarted
+
 * the datasets folder contains 6 csv files:
 	1. actual_seat_count.csv - count of different types of seats in library
 	2. chair.csv - visitor's preference of chairs. This is from survey results

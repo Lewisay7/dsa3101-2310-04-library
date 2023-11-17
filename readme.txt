@@ -30,7 +30,7 @@ https://nusu.sharepoint.com/sites/Section_2310_1390/Shared%20Documents/Forms/All
 	6. model_output.csv - prediction data
 
 * to run the application: 
-	- cd to this dir 
+	- cd to Final dir 
 	- execute docker compose up -d in terminal 
 	- go to http://localhost:5050/home.html
 
